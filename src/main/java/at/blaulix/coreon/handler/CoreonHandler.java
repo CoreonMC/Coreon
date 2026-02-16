@@ -18,7 +18,7 @@ public class CoreonHandler {
     Coreon plugin;
 
     FileConfiguration config = plugin.getConfig();
-    ConfigurationSection functionsSection = config.getConfigurationSection("functions");
+    ConfigurationSection modulesSection = config.getConfigurationSection("modules");
 
     public CoreonHandler(Coreon plugin) {
         this.plugin = plugin;
@@ -34,8 +34,8 @@ public class CoreonHandler {
         ItemMeta meta = book.getItemMeta();
 
         Map<String, Boolean> functionsMap = new HashMap<>();
-        for (String key : functionsSection.getKeys(false)) {
-            boolean value = functionsSection.getBoolean(key);
+        for (String key : modulesSection.getKeys(false)) {
+            boolean value = modulesSection.getBoolean(key);
             functionsMap.put(key, value);
 
             meta.setDisplayName(key);

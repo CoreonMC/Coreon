@@ -1,4 +1,4 @@
 # Enable or disable features that you dont need or want to use. This can help with performance and security.
-functions:
+modules:
   invsee: true
   vanish: true
