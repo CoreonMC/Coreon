@@ -1,12 +1,19 @@
 package at.blaulix.coreon;
 
+import at.blaulix.coreon.command.InvseeCommand;
+
+import at.blaulix.coreon.listener.QuitListener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class Coreon extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        // Plugin startup logic
+        //Listener
+        getServer().getPluginManager().registerEvents(new QuitListener(), this);
+
+        //Commands
+        getCommand("invsee").setExecutor(new InvseeCommand());
 
     }
 
