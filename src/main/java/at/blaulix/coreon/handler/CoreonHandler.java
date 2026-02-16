@@ -20,6 +20,9 @@ public class CoreonHandler {
     FileConfiguration config = plugin.getConfig();
     ConfigurationSection functionsSection = config.getConfigurationSection("functions");
 
+    public CoreonHandler(Coreon plugin) {
+        this.plugin = plugin;
+    }
 
 
     Inventory coreonSettingsP1 = Bukkit.createInventory(null, 36, "Coreon Settings");

@@ -16,7 +16,7 @@ public final class Coreon extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new QuitListener(), this);
 
         //Commands
-        Objects.requireNonNull(getCommand("coreon")).setExecutor(new CoreonCommand());
+        Objects.requireNonNull(getCommand("coreon")).setExecutor(new CoreonCommand(this));
         Objects.requireNonNull(getCommand("invsee")).setExecutor(new InvseeCommand());
 
     }
