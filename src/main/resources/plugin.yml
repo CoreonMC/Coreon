@@ -2,3 +2,12 @@ name: Coreon
 version: '1.0.0'
 main: at.blaulix.coreon.Coreon
 api-version: '1.21'
+
+commands:
+  coreon:
+    description: Coreon Hauptbefehl
+    usage: /coreon
+  invsee:
+    description: Öffnet das Inventar eines Spielers
+    usage: /invsee <Spieler>
+    permission: coreon.invsee
