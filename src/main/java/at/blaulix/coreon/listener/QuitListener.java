@@ -1,5 +1,6 @@
 package at.blaulix.coreon.listener;
 
+import at.blaulix.coreon.util.Playerdata;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -15,20 +16,6 @@ public class QuitListener implements Listener {
     public void onQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
 
-        // Datei erstellen: /plugins/Coreon/playerdata/UUID.yml
-        File folder = new File("plugins/Coreon/playerdata");
-        if (!folder.exists()) folder.mkdirs();
-
-        File file = new File(folder, player.getUniqueId() + ".yml");
-        FileConfiguration config = YamlConfiguration.loadConfiguration(file);
-
-        // Inventar in die Config schreiben (Bukkit kann ItemStacks direkt speichern!)
-        config.set("inventory.content", player.getInventory().getContents());
-
-        try {
-            config.save(file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Playerdata.savePlayerData(player);
     }
 }
