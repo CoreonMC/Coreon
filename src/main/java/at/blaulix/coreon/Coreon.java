@@ -1,5 +1,6 @@
 package at.blaulix.coreon;
 
+import at.blaulix.coreon.command.CoreonCommand;
 import at.blaulix.coreon.command.InvseeCommand;
 
 import at.blaulix.coreon.listener.QuitListener;
@@ -15,6 +16,7 @@ public final class Coreon extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new QuitListener(), this);
 
         //Commands
+        Objects.requireNonNull(getCommand("coreon")).setExecutor(new CoreonCommand());
         Objects.requireNonNull(getCommand("invsee")).setExecutor(new InvseeCommand());
 
     }
