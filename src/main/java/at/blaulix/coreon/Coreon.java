@@ -5,6 +5,8 @@ import at.blaulix.coreon.command.InvseeCommand;
 import at.blaulix.coreon.listener.QuitListener;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.Objects;
+
 public final class Coreon extends JavaPlugin {
 
     @Override
@@ -13,7 +15,7 @@ public final class Coreon extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new QuitListener(), this);
 
         //Commands
-        getCommand("invsee").setExecutor(new InvseeCommand());
+        Objects.requireNonNull(getCommand("invsee")).setExecutor(new InvseeCommand());
 
     }
 
