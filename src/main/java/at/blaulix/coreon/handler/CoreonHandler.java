@@ -1,6 +1,7 @@
 package at.blaulix.coreon.handler;
 
 import at.blaulix.coreon.Coreon;
+import at.blaulix.coreon.util.Formats;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -10,49 +11,63 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.io.File;
 import java.util.Collections;
 
 public class CoreonHandler {
 
-    private final Coreon plugin; // <-- ADDED (final + sauber gekapselt)
+    private final Coreon plugin;
+    private final FileConfiguration config;
+    private final ConfigurationSection modulesSection;
+    private final File commandDescriptions;
 
-    private final FileConfiguration config; // <-- ADDED (nicht mehr oben initialisiert)
-    private final ConfigurationSection modulesSection; // <-- ADDED (nicht mehr oben initialisiert)
-
-    private final Inventory coreonSettingsP1; // <-- ADDED (jetzt im Konstruktor erstellt)
 
     public CoreonHandler(Coreon plugin) {
-        this.plugin = plugin; // <-- ADDED (Plugin korrekt setzen)
+        this.plugin = plugin;
 
-        this.config = plugin.getConfig(); // <-- MOVED (war vorher oben → verursachte NPE)
-        this.modulesSection = config.getConfigurationSection("modules"); // <-- MOVED
+        this.config = plugin.getConfig();
+        this.modulesSection = config.getConfigurationSection("modules");
 
-        this.coreonSettingsP1 = Bukkit.createInventory(null, 36, "Coreon Settings"); // <-- MOVED
+        this.commandDescriptions = plugin.getCommandDescriptions();
     }
 
     public void coreonSettings(Player player) {
 
-        if (modulesSection == null) { // <-- ADDED (Null-Schutz)
+        if (modulesSection == null) {
             player.sendMessage("§cNo modules section found in config!");
             return;
         }
+        Inventory inv = Bukkit.createInventory(null, 36, "Coreon Settings");
 
         for (String key : modulesSection.getKeys(false)) {
 
             boolean value = modulesSection.getBoolean(key);
 
-            ItemStack book = new ItemStack(Material.BOOK); // <-- MOVED (war außerhalb der Schleife)
+            ItemStack book = new ItemStack(Material.BOOK);
             ItemMeta meta = book.getItemMeta();
+            String displayName = "§l§2" + Formats.capitalizeFirstChar(key);
 
-            if (meta != null) { // <-- ADDED (Null-Schutz)
-                meta.setDisplayName(key);
-                meta.setLore(Collections.singletonList("Activated: " + value));
+
+            if (meta != null) {
+                meta.setDisplayName(displayName);
+                meta.setLore(Collections.singletonList("§bActivated: " + value));
                 book.setItemMeta(meta);
             }
 
-            coreonSettingsP1.addItem(book);
+            inv.addItem(book);
         }
 
-        player.openInventory(coreonSettingsP1);
+        player.openInventory(inv);
     }
+
+    public void settings(String key, boolean value) {
+
+        boolean newValue = !value;
+
+        config.set("modules." + key, newValue);
+        plugin.saveConfig();
+
+        Bukkit.broadcastMessage("§aModule " + key + " set to " + newValue);
+    }
+
 }
