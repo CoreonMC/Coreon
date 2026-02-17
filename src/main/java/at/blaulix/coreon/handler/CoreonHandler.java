@@ -20,6 +20,7 @@ public class CoreonHandler {
     private final FileConfiguration config;
     private final ConfigurationSection modulesSection;
     private final File commandDescriptions;
+    private static Inventory inv;
 
 
     public CoreonHandler(Coreon plugin) {
@@ -37,8 +38,26 @@ public class CoreonHandler {
             player.sendMessage("§cNo modules section found in config!");
             return;
         }
-        Inventory inv = Bukkit.createInventory(null, 36, "Coreon Settings");
+        inv = Bukkit.createInventory(null, 36, "Coreon Settings");
 
+        loadSettings();
+
+        player.openInventory(inv);
+    }
+
+    public void settings(String key, boolean value) {
+
+        boolean newValue = !value;
+
+        config.set("modules." + key, newValue);
+        loadSettings();
+        plugin.saveConfig();
+
+        Bukkit.broadcastMessage("§aModule " + key + " set to " + newValue);
+    }
+
+    public void loadSettings(){
+        inv.clear();
         for (String key : modulesSection.getKeys(false)) {
 
             boolean value = modulesSection.getBoolean(key);
@@ -56,18 +75,5 @@ public class CoreonHandler {
 
             inv.addItem(book);
         }
-
-        player.openInventory(inv);
     }
-
-    public void settings(String key, boolean value) {
-
-        boolean newValue = !value;
-
-        config.set("modules." + key, newValue);
-        plugin.saveConfig();
-
-        Bukkit.broadcastMessage("§aModule " + key + " set to " + newValue);
-    }
-
 }

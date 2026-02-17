@@ -1,6 +1,8 @@
 package at.blaulix.coreon.listener;
 
 import at.blaulix.coreon.handler.CoreonHandler;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -21,23 +23,26 @@ public class CoreonSettingsListener implements Listener {
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
 
-        if (!(event.getWhoClicked() instanceof Player player)) return;
+        if (!(event.getWhoClicked() instanceof Player)) {
+            return;
+        }
 
         if (event.getView().getTitle().equals("Coreon Settings")) {
 
             event.setCancelled(true);
 
             ItemStack clicked = event.getCurrentItem();
-            if (clicked == null || !clicked.hasItemMeta()) return;
+            if (clicked == null || !clicked.hasItemMeta()) {
+                return;
+            }
 
             String displayName = clicked.getItemMeta().getDisplayName();
-            if (displayName == null) return;
 
-            // Farbcode & Formatierung entfernen
-            String key = displayName.replace("§l§2", "").toLowerCase();
+            String key = ChatColor.stripColor(displayName).toLowerCase();
 
-            if (!modulesSection.contains(key)) return;
-
+            if (!modulesSection.contains(key)) {
+                return;
+            }
             boolean value = modulesSection.getBoolean(key);
 
             handler.settings(key, value);
