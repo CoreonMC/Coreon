@@ -1,7 +1,6 @@
 package at.blaulix.coreon.listener;
 
 import at.blaulix.coreon.handler.CoreonHandler;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
