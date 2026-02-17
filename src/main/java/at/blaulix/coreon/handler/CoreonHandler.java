@@ -11,36 +11,44 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 public class CoreonHandler {
-    Coreon plugin;
 
-    FileConfiguration config = plugin.getConfig();
-    ConfigurationSection modulesSection = config.getConfigurationSection("modules");
+    private final Coreon plugin; // <-- ADDED (final + sauber gekapselt)
+
+    private final FileConfiguration config; // <-- ADDED (nicht mehr oben initialisiert)
+    private final ConfigurationSection modulesSection; // <-- ADDED (nicht mehr oben initialisiert)
+
+    private final Inventory coreonSettingsP1; // <-- ADDED (jetzt im Konstruktor erstellt)
 
     public CoreonHandler(Coreon plugin) {
-        this.plugin = plugin;
+        this.plugin = plugin; // <-- ADDED (Plugin korrekt setzen)
+
+        this.config = plugin.getConfig(); // <-- MOVED (war vorher oben → verursachte NPE)
+        this.modulesSection = config.getConfigurationSection("modules"); // <-- MOVED
+
+        this.coreonSettingsP1 = Bukkit.createInventory(null, 36, "Coreon Settings"); // <-- MOVED
     }
 
-
-    Inventory coreonSettingsP1 = Bukkit.createInventory(null, 36, "Coreon Settings");
-
-
-
     public void coreonSettings(Player player) {
-        ItemStack book = new ItemStack(Material.BOOK, 1);
-        ItemMeta meta = book.getItemMeta();
 
-        Map<String, Boolean> functionsMap = new HashMap<>();
+        if (modulesSection == null) { // <-- ADDED (Null-Schutz)
+            player.sendMessage("§cNo modules section found in config!");
+            return;
+        }
+
         for (String key : modulesSection.getKeys(false)) {
-            boolean value = modulesSection.getBoolean(key);
-            functionsMap.put(key, value);
 
-            meta.setDisplayName(key);
-            meta.setLore(Collections.singletonList("Activated:" + value));
-            book.setItemMeta(meta);
+            boolean value = modulesSection.getBoolean(key);
+
+            ItemStack book = new ItemStack(Material.BOOK); // <-- MOVED (war außerhalb der Schleife)
+            ItemMeta meta = book.getItemMeta();
+
+            if (meta != null) { // <-- ADDED (Null-Schutz)
+                meta.setDisplayName(key);
+                meta.setLore(Collections.singletonList("Activated: " + value));
+                book.setItemMeta(meta);
+            }
 
             coreonSettingsP1.addItem(book);
         }

@@ -12,13 +12,14 @@ public final class Coreon extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        saveDefaultConfig();
         //Listener
         getServer().getPluginManager().registerEvents(new QuitListener(), this);
 
         //Commands
         Objects.requireNonNull(getCommand("coreon")).setExecutor(new CoreonCommand(this));
         Objects.requireNonNull(getCommand("invsee")).setExecutor(new InvseeCommand());
-        Objects.requireNonNull(getCommand("vanish")).setExecutor(new VanishCommand());
+        //Objects.requireNonNull(getCommand("vanish")).setExecutor(new VanishCommand());
     }
 
     @Override
