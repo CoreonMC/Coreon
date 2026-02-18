@@ -22,7 +22,7 @@ public final class Coreon extends JavaPlugin {
 
         //Listener
         getServer().getPluginManager().registerEvents(new QuitListener(), this);
-        Bukkit.getPluginManager().registerEvents(new CoreonSettingsListener(settingsHandler, getConfig().getConfigurationSection("modules")), this);
+        Bukkit.getPluginManager().registerEvents(new CoreonSettingsListener(settingsHandler), this);
 
         //Commands
         Objects.requireNonNull(getCommand("coreon")).setExecutor(new CoreonCommand(this));

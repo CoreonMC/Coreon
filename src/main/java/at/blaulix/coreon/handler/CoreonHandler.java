@@ -5,70 +5,86 @@ import at.blaulix.coreon.util.Formats;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.io.File;
 import java.util.Collections;
 
 public class CoreonHandler {
 
     private final Coreon plugin;
-    private final FileConfiguration config;
-    private final ConfigurationSection modulesSection;
-    private final File commandDescriptions;
-    private static Inventory inv;
-
 
     public CoreonHandler(Coreon plugin) {
         this.plugin = plugin;
+    }
 
-        this.config = plugin.getConfig();
-        this.modulesSection = config.getConfigurationSection("modules");
-
-        this.commandDescriptions = plugin.getCommandDescriptions();
+    public Coreon getPlugin() {
+        return plugin;
     }
 
     public void coreonSettings(Player player) {
 
+        ConfigurationSection modulesSection = plugin.getConfig().getConfigurationSection("modules");
         if (modulesSection == null) {
             player.sendMessage("§cNo modules section found in config!");
             return;
         }
-        inv = Bukkit.createInventory(null, 36, "Coreon Settings");
 
-        loadSettings();
+        Inventory inv = Bukkit.createInventory(null, 36, "Coreon Settings");
+
+        loadSettings(inv);
 
         player.openInventory(inv);
     }
 
-    public void settings(String key, boolean value) {
+    public void partSettings(String key, Player player) {
 
-        boolean newValue = !value;
+        boolean value = plugin.getConfig().getBoolean("modules." + key);
 
-        config.set("modules." + key, newValue);
-        loadSettings();
-        plugin.saveConfig();
+        String invTitle = "§l§2" + Formats.capitalizeFirstChar(key);
+        Inventory settingsInv = Bukkit.createInventory(null, 36, invTitle);
 
-        Bukkit.broadcastMessage("§aModule " + key + " set to " + newValue);
+        ItemStack toggle = new ItemStack(Material.LEVER);
+        ItemMeta toggleMeta = toggle.getItemMeta();
+
+        if (toggleMeta != null) {
+            toggleMeta.setDisplayName("§l§bToggle " + Formats.capitalizeFirstChar(key));
+            toggleMeta.setLore(Collections.singletonList("§5Activated: " + value));
+            toggle.setItemMeta(toggleMeta);
+        }
+
+        settingsInv.setItem(13, toggle);
+
+        player.openInventory(settingsInv);
     }
 
-    public void loadSettings(){
-        inv.clear();
+    public void changeActive(String key, Player player) {
+
+        boolean current = plugin.getConfig().getBoolean("modules." + key);
+        boolean newValue = !current;
+
+        plugin.getConfig().set("modules." + key, newValue);
+        plugin.saveConfig();
+
+        partSettings(key, player);
+    }
+
+    private void loadSettings(Inventory inv) {
+
+        ConfigurationSection modulesSection = plugin.getConfig().getConfigurationSection("modules");
+        if (modulesSection == null) return;
+
         for (String key : modulesSection.getKeys(false)) {
 
             boolean value = modulesSection.getBoolean(key);
 
             ItemStack book = new ItemStack(Material.BOOK);
             ItemMeta meta = book.getItemMeta();
-            String displayName = "§l§2" + Formats.capitalizeFirstChar(key);
-
 
             if (meta != null) {
-                meta.setDisplayName(displayName);
+                meta.setDisplayName("§l§2" + Formats.capitalizeFirstChar(key));
                 meta.setLore(Collections.singletonList("§bActivated: " + value));
                 book.setItemMeta(meta);
             }

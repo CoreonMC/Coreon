@@ -12,21 +12,27 @@ import org.bukkit.inventory.ItemStack;
 public class CoreonSettingsListener implements Listener {
 
     private final CoreonHandler handler;
-    private final ConfigurationSection modulesSection;
 
-    public CoreonSettingsListener(CoreonHandler handler, ConfigurationSection modulesSection) {
+    public CoreonSettingsListener(CoreonHandler handler) {
         this.handler = handler;
-        this.modulesSection = modulesSection;
     }
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
 
-        if (!(event.getWhoClicked() instanceof Player)) {
+        if (!(event.getWhoClicked() instanceof Player player)) {
             return;
         }
 
-        if (event.getView().getTitle().equals("Coreon Settings")) {
+        String title = event.getView().getTitle();
+
+        ConfigurationSection modulesSection = handler.getPlugin().getConfig().getConfigurationSection("modules");
+        if (modulesSection == null) {
+            return;
+        }
+
+
+        if (title.equals("Coreon Settings")) {
 
             event.setCancelled(true);
 
@@ -35,16 +41,35 @@ public class CoreonSettingsListener implements Listener {
                 return;
             }
 
-            String displayName = clicked.getItemMeta().getDisplayName();
-
-            String key = ChatColor.stripColor(displayName).toLowerCase();
+            String key = ChatColor.stripColor(clicked.getItemMeta().getDisplayName()).toLowerCase();
 
             if (!modulesSection.contains(key)) {
                 return;
             }
-            boolean value = modulesSection.getBoolean(key);
 
-            handler.settings(key, value);
+            handler.partSettings(key, player);
+            return;
+        }
+
+
+        String strippedTitle = ChatColor.stripColor(title).toLowerCase();
+
+        if (modulesSection.contains(strippedTitle)) {
+
+            event.setCancelled(true);
+
+            ItemStack clicked = event.getCurrentItem();
+            if (clicked == null || !clicked.hasItemMeta()) {
+                return;
+            }
+
+            String displayName = ChatColor.stripColor(clicked.getItemMeta().getDisplayName()).toLowerCase();
+
+            if (!displayName.startsWith("toggle")) {
+                return;
+            }
+
+            handler.changeActive(strippedTitle, player);
         }
     }
 }
