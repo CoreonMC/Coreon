@@ -52,9 +52,9 @@ public class CoreonSettingsListener implements Listener {
         }
 
 
-        String strippedTitle = ChatColor.stripColor(title).toLowerCase();
+        String settingsTitle = ChatColor.stripColor(title).toLowerCase();
 
-        if (modulesSection.contains(strippedTitle)) {
+        if (modulesSection.contains(settingsTitle)) {
 
             event.setCancelled(true);
 
@@ -63,13 +63,32 @@ public class CoreonSettingsListener implements Listener {
                 return;
             }
 
-            String displayName = ChatColor.stripColor(clicked.getItemMeta().getDisplayName()).toLowerCase();
+            handler.deActiveSettings(settingsTitle, player);
+        }
 
-            if (!displayName.startsWith("toggle")) {
+        String toggleTitle = ChatColor.stripColor(title).toLowerCase();
+
+        if (toggleTitle.startsWith("(de-)activation")) {
+            event.setCancelled(true);
+
+            ItemStack clicked = event.getCurrentItem();
+            if (clicked == null || !clicked.hasItemMeta()) {
                 return;
             }
 
-            handler.changeActive(strippedTitle, player);
+            String itemName = ChatColor.stripColor(clicked.getItemMeta().getDisplayName()).toLowerCase();
+
+            if (itemName.startsWith("confirm")) {
+                String key = toggleTitle.replace("de-activation ", "");
+                handler.changeActive(key, player);
+            }
+            if(itemName.startsWith("cancel")) {
+                String key = toggleTitle.replace("de-activation ", "");
+                handler.partSettings(key, player);
+            }
+
+
+
         }
     }
 }
