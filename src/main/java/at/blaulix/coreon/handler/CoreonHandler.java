@@ -24,6 +24,8 @@ public class CoreonHandler {
         return plugin;
     }
 
+    private Inventory inv;
+
     public void coreonSettings(Player player) {
 
         ConfigurationSection modulesSection = plugin.getConfig().getConfigurationSection("modules");
@@ -32,7 +34,7 @@ public class CoreonHandler {
             return;
         }
 
-        Inventory inv = Bukkit.createInventory(null, 36, "Coreon Settings");
+        inv = Bukkit.createInventory(null, 36, "Coreon Settings");
 
         loadSettings(inv);
 
@@ -44,7 +46,7 @@ public class CoreonHandler {
         boolean value = plugin.getConfig().getBoolean("modules." + key);
 
         String invTitle = "§l§2" + Formats.capitalizeFirstChar(key);
-        Inventory settingsInv = Bukkit.createInventory(null, 36, invTitle);
+        inv = Bukkit.createInventory(null, 36, invTitle);
 
         ItemStack toggle = new ItemStack(Material.LEVER);
         ItemMeta toggleMeta = toggle.getItemMeta();
@@ -55,9 +57,10 @@ public class CoreonHandler {
             toggle.setItemMeta(toggleMeta);
         }
 
-        settingsInv.setItem(13, toggle);
+        inv.clear();
+        inv.setItem(13, toggle);
 
-        player.openInventory(settingsInv);
+        player.openInventory(inv);
     }
 
     public void deActiveSettings(String key, Player player) {
@@ -65,7 +68,7 @@ public class CoreonHandler {
         boolean value = plugin.getConfig().getBoolean("modules." + key);
 
         String invTitle = "§l§2(De-)Activation " + Formats.capitalizeFirstChar(key);
-        Inventory deActivationInv = Bukkit.createInventory(null, 36, invTitle);
+        inv = Bukkit.createInventory(null, 36, invTitle);
 
         ItemStack toggle = new ItemStack(Material.LEVER);
         ItemMeta toggleMeta = toggle.getItemMeta();
@@ -81,22 +84,24 @@ public class CoreonHandler {
             toggleMeta.setLore(Collections.singletonList("§5Activated: " + value));
             toggle.setItemMeta(toggleMeta);
         }
+
         if (confirmMeta != null) {
             confirmMeta.setDisplayName("§l§aConfirm");
             confirmMeta.setLore(Collections.singletonList("§5Click to turn " + Formats.capitalizeFirstChar(key) + " " + (!value)));
             confirm.setItemMeta(confirmMeta);
         }
+
         if (cancelMeta != null) {
             cancelMeta.setDisplayName("§l§cCancel");
             cancel.setItemMeta(cancelMeta);
         }
 
-        deActivationInv.setItem(13, toggle);
-        deActivationInv.setItem(21, confirm);
-        deActivationInv.setItem(23, cancel);
+        inv.clear();
+        inv.setItem(13, toggle);
+        inv.setItem(21, confirm);
+        inv.setItem(23, cancel);
 
-
-        player.openInventory(deActivationInv);
+        player.openInventory(inv);
     }
 
     public void changeActive(String key, Player player) {
@@ -114,6 +119,8 @@ public class CoreonHandler {
 
         ConfigurationSection modulesSection = plugin.getConfig().getConfigurationSection("modules");
         if (modulesSection == null) return;
+
+        inv.clear();
 
         for (String key : modulesSection.getKeys(false)) {
 

@@ -20,75 +20,47 @@ public class CoreonSettingsListener implements Listener {
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
 
-        if (!(event.getWhoClicked() instanceof Player player)) {
-            return;
-        }
+        if (!(event.getWhoClicked() instanceof Player player)) return;
 
-        String title = event.getView().getTitle();
+        String title = ChatColor.stripColor(event.getView().getTitle()).toLowerCase();
 
         ConfigurationSection modulesSection = handler.getPlugin().getConfig().getConfigurationSection("modules");
-        if (modulesSection == null) {
+        if (modulesSection == null) return;
+
+        ItemStack clicked = event.getCurrentItem();
+        if (clicked == null || !clicked.hasItemMeta()) return;
+
+        String itemName = ChatColor.stripColor(clicked.getItemMeta().getDisplayName()).toLowerCase();
+
+
+        if (title.equals("coreon settings")) {
+            event.setCancelled(true);
+
+            if (!modulesSection.contains(itemName)) return;
+
+            handler.partSettings(itemName, player);
+            return;
+        }
+
+        if (modulesSection.contains(title)) {
+            event.setCancelled(true);
+            handler.deActiveSettings(title, player);
             return;
         }
 
 
-        if (title.equals("Coreon Settings")) {
-
+        if (title.startsWith("(de-)activation ")) {
             event.setCancelled(true);
 
-            ItemStack clicked = event.getCurrentItem();
-            if (clicked == null || !clicked.hasItemMeta()) {
-                return;
-            }
-
-            String key = ChatColor.stripColor(clicked.getItemMeta().getDisplayName()).toLowerCase();
-
-            if (!modulesSection.contains(key)) {
-                return;
-            }
-
-            handler.partSettings(key, player);
-            return;
-        }
-
-
-        String settingsTitle = ChatColor.stripColor(title).toLowerCase();
-
-        if (modulesSection.contains(settingsTitle)) {
-
-            event.setCancelled(true);
-
-            ItemStack clicked = event.getCurrentItem();
-            if (clicked == null || !clicked.hasItemMeta()) {
-                return;
-            }
-
-            handler.deActiveSettings(settingsTitle, player);
-        }
-
-        String toggleTitle = ChatColor.stripColor(title).toLowerCase();
-
-        if (toggleTitle.startsWith("(de-)activation")) {
-            event.setCancelled(true);
-
-            ItemStack clicked = event.getCurrentItem();
-            if (clicked == null || !clicked.hasItemMeta()) {
-                return;
-            }
-
-            String itemName = ChatColor.stripColor(clicked.getItemMeta().getDisplayName()).toLowerCase();
+            String key = title.substring("(de-)activation ".length());
 
             if (itemName.startsWith("confirm")) {
-                String key = toggleTitle.replace("de-activation ", "");
                 handler.changeActive(key, player);
             }
-            if(itemName.startsWith("cancel")) {
-                String key = toggleTitle.replace("de-activation ", "");
+
+            if (itemName.startsWith("cancel")) {
                 handler.partSettings(key, player);
             }
-
-
-
         }
     }
 }

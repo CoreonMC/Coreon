@@ -1,6 +1,5 @@
 package at.blaulix.coreon.command;
 
-import at.blaulix.coreon.Coreon;
 import at.blaulix.coreon.handler.CoreonHandler;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -10,10 +9,10 @@ import org.jetbrains.annotations.NotNull;
 
 public class CoreonCommand implements CommandExecutor {
 
-    private final Coreon plugin;
+    private final CoreonHandler handler;
 
-    public CoreonCommand(Coreon plugin) {
-        this.plugin = plugin;
+    public CoreonCommand(CoreonHandler handler) {
+        this.handler = handler;
     }
 
     @Override
@@ -25,9 +24,7 @@ public class CoreonCommand implements CommandExecutor {
         }
 
         if (sender instanceof Player player) {
-            CoreonHandler coreonHandler = new CoreonHandler(plugin);
-            coreonHandler.coreonSettings(player);
-            return true;
+            handler.coreonSettings(player);
         }
 
         return true;

@@ -18,14 +18,14 @@ public final class Coreon extends JavaPlugin {
     public void onEnable() {
         saveDefaultConfig();
         //Handler
-        CoreonHandler settingsHandler = new CoreonHandler(this);
+        CoreonHandler coreonHandler = new CoreonHandler(this);
 
         //Listener
         getServer().getPluginManager().registerEvents(new QuitListener(), this);
-        Bukkit.getPluginManager().registerEvents(new CoreonSettingsListener(settingsHandler), this);
+        getServer().getPluginManager().registerEvents(new CoreonSettingsListener(coreonHandler), this);
 
         //Commands
-        Objects.requireNonNull(getCommand("coreon")).setExecutor(new CoreonCommand(this));
+        Objects.requireNonNull(getCommand("coreon")).setExecutor(new CoreonCommand(coreonHandler));
         Objects.requireNonNull(getCommand("invsee")).setExecutor(new InvseeCommand());
         //Objects.requireNonNull(getCommand("vanish")).setExecutor(new VanishCommand());
     }
