@@ -9,12 +9,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
-public class CoreonSettingsListener implements Listener {
+public class CoreonListener implements Listener {
 
     // Handles GUI logic and module actions
     private final CoreonHandler handler;
 
-    public CoreonSettingsListener(CoreonHandler handler) {
+    public CoreonListener(CoreonHandler handler) {
         this.handler = handler;
     }
 

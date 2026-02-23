@@ -3,9 +3,8 @@ package at.blaulix.coreon;
 import at.blaulix.coreon.command.CoreonCommand;
 import at.blaulix.coreon.command.InvseeCommand;
 import at.blaulix.coreon.handler.CoreonHandler;
-import at.blaulix.coreon.listener.CoreonSettingsListener;
+import at.blaulix.coreon.listener.CoreonListener;
 import at.blaulix.coreon.listener.QuitListener;
-import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -22,7 +21,7 @@ public final class Coreon extends JavaPlugin {
 
         //Listener
         getServer().getPluginManager().registerEvents(new QuitListener(), this);
-        getServer().getPluginManager().registerEvents(new CoreonSettingsListener(coreonHandler), this);
+        getServer().getPluginManager().registerEvents(new CoreonListener(coreonHandler), this);
 
         //Commands
         Objects.requireNonNull(getCommand("coreon")).setExecutor(new CoreonCommand(coreonHandler));
