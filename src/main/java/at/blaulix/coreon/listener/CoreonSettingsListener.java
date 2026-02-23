@@ -11,7 +11,7 @@ import org.bukkit.inventory.ItemStack;
 
 public class CoreonSettingsListener implements Listener {
 
-    // Handler für die GUI-Logik
+    // Handles GUI logic and module actions
     private final CoreonHandler handler;
 
     public CoreonSettingsListener(CoreonHandler handler) {
@@ -21,57 +21,57 @@ public class CoreonSettingsListener implements Listener {
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
 
-        // Prüfen ob ein Spieler geklickt hat
+        // Ensure the clicker is a player
         if (!(event.getWhoClicked() instanceof Player player)) return;
 
-        // Titel des geöffneten Inventars (ohne Farben, klein geschrieben)
+        // Get inventory title (remove colors, lowercase for comparison)
         String title = ChatColor.stripColor(event.getView().getTitle()).toLowerCase();
 
-        // "modules" Section aus der Config holen
+        // Get "modules" section from config
         ConfigurationSection modulesSection = handler.getPlugin().getConfig().getConfigurationSection("modules");
         if (modulesSection == null) return;
 
-        // Geklicktes Item holen
+        // Get clicked item
         ItemStack clicked = event.getCurrentItem();
         if (clicked == null || !clicked.hasItemMeta()) return;
 
-        // Anzeigename des Items (ohne Farben, klein geschrieben)
+        // Get item display name (remove colors, lowercase)
         String itemName = ChatColor.stripColor(clicked.getItemMeta().getDisplayName()).toLowerCase();
 
-        // Haupt-Settings GUI
+        // Main settings GUI
         if (title.equals("coreon settings")) {
-            event.setCancelled(true); // Klick blockieren
+            event.setCancelled(true); // Prevent item movement
 
-            // Prüfen ob Modul existiert
+            // Check if module exists in config
             if (!modulesSection.contains(itemName)) return;
 
-            // Untermenü für das Modul öffnen
+            // Open module submenu
             handler.partSettings(itemName, player);
             return;
         }
 
-        // Modul-Untermenü
+        // Module submenu
         if (modulesSection.contains(title)) {
-            event.setCancelled(true); // Klick blockieren
+            event.setCancelled(true); // Prevent item movement
 
-            // Aktivierungs/Deaktivierungs Menü öffnen
+            // Open activation/deactivation menu
             handler.deActiveSettings(title, player);
             return;
         }
 
-        // Bestätigungsmenü für (De-)Aktivierung
+        // Confirmation menu for (de-)activation
         if (title.startsWith("(de-)activation ")) {
             event.setCancelled(true);
 
-            // Modul-Name aus Titel extrahieren
+            // Extract module key from title
             String key = title.substring("(de-)activation ".length());
 
-            // Aktivierung bestätigen
+            // Confirm activation toggle
             if (itemName.startsWith("confirm")) {
                 handler.changeActive(key, player);
             }
 
-            // Zurück zum Modulmenü
+            // Return to module menu
             if (itemName.startsWith("cancel")) {
                 handler.partSettings(key, player);
             }
