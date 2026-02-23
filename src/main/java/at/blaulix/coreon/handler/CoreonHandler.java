@@ -36,6 +36,16 @@ public class CoreonHandler {
 
         inv = Bukkit.createInventory(null, 36, "Coreon Settings");
 
+        ItemStack exit = new ItemStack(Material.BARRIER);
+        ItemMeta exitMeta = exit.getItemMeta();
+
+        if (exitMeta != null) {
+            exitMeta.setDisplayName("§l§4Exit");
+            exit.setItemMeta(exitMeta);
+        }
+
+        inv.setItem(35, exit);
+
         loadSettings(inv);
 
         player.openInventory(inv);
@@ -51,14 +61,23 @@ public class CoreonHandler {
         ItemStack toggle = new ItemStack(Material.LEVER);
         ItemMeta toggleMeta = toggle.getItemMeta();
 
+        ItemStack back = new ItemStack(Material.BARRIER);
+        ItemMeta backMeta = back.getItemMeta();
+
         if (toggleMeta != null) {
             toggleMeta.setDisplayName("§l§bToggle " + Formats.capitalizeFirstChar(key));
             toggleMeta.setLore(Collections.singletonList("§5Activated: " + value));
             toggle.setItemMeta(toggleMeta);
         }
 
+        if (backMeta != null) {
+            backMeta.setDisplayName("§l§4Back");
+            back.setItemMeta(backMeta);
+        }
+
         inv.clear();
         inv.setItem(13, toggle);
+        inv.setItem(35, back);
 
         player.openInventory(inv);
     }
@@ -92,7 +111,7 @@ public class CoreonHandler {
         }
 
         if (cancelMeta != null) {
-            cancelMeta.setDisplayName("§l§cCancel");
+            cancelMeta.setDisplayName("§l§4Cancel");
             cancel.setItemMeta(cancelMeta);
         }
 

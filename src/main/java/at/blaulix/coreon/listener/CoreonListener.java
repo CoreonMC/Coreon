@@ -42,6 +42,11 @@ public class CoreonListener implements Listener {
         if (title.equals("coreon settings")) {
             event.setCancelled(true); // Prevent item movement
 
+            // Exit Button
+            if (itemName.equals("exit")) {
+                player.closeInventory();
+                return;
+            }
             // Check if module exists in config
             if (!modulesSection.contains(itemName)) return;
 
@@ -53,7 +58,11 @@ public class CoreonListener implements Listener {
         // Module submenu
         if (modulesSection.contains(title)) {
             event.setCancelled(true); // Prevent item movement
-
+            // Back Button
+            if (itemName.equals("back")){
+                handler.coreonSettings(player);
+                return;
+            }
             // Open activation/deactivation menu
             handler.deActiveSettings(title, player);
             return;
