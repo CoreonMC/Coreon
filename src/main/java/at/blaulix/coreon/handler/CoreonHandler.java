@@ -73,10 +73,10 @@ public class CoreonHandler {
         ItemStack toggle = new ItemStack(Material.LEVER);
         ItemMeta toggleMeta = toggle.getItemMeta();
 
-        ItemStack confirm = new ItemStack(Material.GREEN_WOOL);
+        ItemStack confirm = new ItemStack(Material.GREEN_STAINED_GLASS_PANE);
         ItemMeta confirmMeta = confirm.getItemMeta();
 
-        ItemStack cancel = new ItemStack(Material.RED_WOOL);
+        ItemStack cancel = new ItemStack(Material.RED_STAINED_GLASS_PANE);
         ItemMeta cancelMeta = cancel.getItemMeta();
 
         if (toggleMeta != null) {
