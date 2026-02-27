@@ -44,9 +44,7 @@ public class CoreonHandler {
             exit.setItemMeta(exitMeta);
         }
 
-        inv.setItem(35, exit);
-
-        loadSettings(inv);
+        loadSettings(inv, exit);
 
         player.openInventory(inv);
     }
@@ -54,12 +52,16 @@ public class CoreonHandler {
     public void partSettings(String key, Player player) {
 
         boolean value = plugin.getConfig().getBoolean("modules." + key);
+        String descriptionString = plugin.getCommandDescriptions().getPath() + "." + key.toLowerCase();
 
         String invTitle = "§l§2" + Formats.capitalizeFirstChar(key);
         inv = Bukkit.createInventory(null, 36, invTitle);
 
         ItemStack toggle = new ItemStack(Material.LEVER);
         ItemMeta toggleMeta = toggle.getItemMeta();
+
+        ItemStack description = new ItemStack(Material.PAPER);
+        ItemMeta descriptionMeta = description.getItemMeta();
 
         ItemStack back = new ItemStack(Material.BARRIER);
         ItemMeta backMeta = back.getItemMeta();
@@ -68,6 +70,12 @@ public class CoreonHandler {
             toggleMeta.setDisplayName("§l§bToggle " + Formats.capitalizeFirstChar(key));
             toggleMeta.setLore(Collections.singletonList("§5Activated: " + value));
             toggle.setItemMeta(toggleMeta);
+        }
+
+        if (descriptionMeta != null) {
+            descriptionMeta.setDisplayName("§l§eDescription");
+            descriptionMeta.setLore(Collections.singletonList("§5" + descriptionString));
+            description.setItemMeta(descriptionMeta);
         }
 
         if (backMeta != null) {
@@ -134,13 +142,13 @@ public class CoreonHandler {
         partSettings(key, player);
     }
 
-    private void loadSettings(Inventory inv) {
+    private void loadSettings(Inventory inv, ItemStack exit) {
 
         ConfigurationSection modulesSection = plugin.getConfig().getConfigurationSection("modules");
         if (modulesSection == null) return;
 
         inv.clear();
-
+        inv.setItem(35, exit);
         for (String key : modulesSection.getKeys(false)) {
 
             boolean value = modulesSection.getBoolean(key);
