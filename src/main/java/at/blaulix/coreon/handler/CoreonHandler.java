@@ -12,8 +12,13 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Collections;
 
+/**
+ * GUI handler for module settings.
+ * Builds and opens inventories to view/toggle modules.
+ */
 public class CoreonHandler {
 
+    // Plugin instance for config and utilities
     private final Coreon plugin;
 
     public CoreonHandler(Coreon plugin) {
@@ -24,8 +29,10 @@ public class CoreonHandler {
         return plugin;
     }
 
+    // Temporary inventory used while constructing GUIs
     private Inventory inv;
 
+    /** Open the main settings GUI showing all modules. */
     public void coreonSettings(Player player) {
 
         ConfigurationSection modulesSection = plugin.getConfig().getConfigurationSection("modules");
@@ -34,8 +41,10 @@ public class CoreonHandler {
             return;
         }
 
+        // 36-slot inventory titled "Coreon Settings"
         inv = Bukkit.createInventory(null, 36, "Coreon Settings");
 
+        // Exit button (barrier)
         ItemStack exit = new ItemStack(Material.BARRIER);
         ItemMeta exitMeta = exit.getItemMeta();
 
@@ -44,11 +53,12 @@ public class CoreonHandler {
             exit.setItemMeta(exitMeta);
         }
 
+        // Fill inventory and open for player
         loadSettings(inv, exit);
-
         player.openInventory(inv);
     }
 
+    /** Open per-module GUI to view and toggle a single module. */
     public void partSettings(String key, Player player) {
 
         boolean value = plugin.getConfig().getBoolean("modules." + key);
@@ -57,6 +67,7 @@ public class CoreonHandler {
         String invTitle = "§l§2" + Formats.capitalizeFirstChar(key);
         inv = Bukkit.createInventory(null, 36, invTitle);
 
+        // Items: toggle lever, description paper, back button
         ItemStack toggle = new ItemStack(Material.LEVER);
         ItemMeta toggleMeta = toggle.getItemMeta();
 
@@ -90,6 +101,7 @@ public class CoreonHandler {
         player.openInventory(inv);
     }
 
+    /** Open confirmation GUI for enabling/disabling a module. */
     public void deActiveSettings(String key, Player player) {
 
         boolean value = plugin.getConfig().getBoolean("modules." + key);
@@ -131,6 +143,7 @@ public class CoreonHandler {
         player.openInventory(inv);
     }
 
+    /** Toggle the module value in config and reopen its GUI. */
     public void changeActive(String key, Player player) {
 
         boolean current = plugin.getConfig().getBoolean("modules." + key);
@@ -142,6 +155,7 @@ public class CoreonHandler {
         partSettings(key, player);
     }
 
+    /** Fill inventory with one book per module and an exit button. */
     private void loadSettings(Inventory inv, ItemStack exit) {
 
         ConfigurationSection modulesSection = plugin.getConfig().getConfigurationSection("modules");
