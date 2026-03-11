@@ -23,6 +23,7 @@ public class VanishHandler {
         if(!player.isInvisible()) {
             player.setInvisible(true);
             player.setSilent(true);
+            player.setInvulnerable(true);
 
             // Reassign appended parts back to message (Component is immutable)
             message = message.append(player.displayName())
@@ -35,6 +36,7 @@ public class VanishHandler {
         } else {
             player.setInvisible(false);
             player.setSilent(false);
+            player.setInvulnerable(false);
 
             // Reassign appended parts back to message
             message = message.append(player.displayName())
