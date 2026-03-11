@@ -1,8 +1,11 @@
 package at.blaulix.coreon.handler;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Color;
 import org.bukkit.entity.Player;
 
+import static net.kyori.adventure.text.minimessage.tag.standard.StandardTags.color;
 import static org.bukkit.Bukkit.getServer;
 
 /**
@@ -16,16 +19,30 @@ public class VanishHandler {
      * Note: the server lookup may return null in some cases.
      */
     public void vanishPlayer(Player player) {
-        // Lookup an online Player by UUID (may be null if not found)
         Player allPlayer = getServer().getPlayer(player.getUniqueId());
 
-        // Make the player invisible so they are not visible to others
-        player.setInvisible(true);
+        // Wir starten mit der Farbe Gold/Gelb
+        Component message = Component.text().color(NamedTextColor.YELLOW).build();
 
-        // Make the player silent so they do not produce sounds
-        player.setSilent(true);
+        if(!player.isInvisible()) {
+            player.setInvisible(true);
+            player.setSilent(true);
 
-        // Send a simple notification message (this will NPE if allPlayer is null)
-        allPlayer.sendMessage(Color.YELLOW + "" + player + " left the game.");
+            // WICHTIG: message = ... zuweisen!
+            message = message.append(player.displayName())
+                    .append(Component.text(" left the game."));
+
+            allPlayer.sendMessage(message);
+        } else {
+            player.setInvisible(false);
+            player.setSilent(false);
+
+            // WICHTIG: message = ... zuweisen!
+            message = message.append(player.displayName())
+                    .append(Component.text(" joined the game."));
+
+            allPlayer.sendMessage(message);
+        }
     }
+
 }

@@ -2,6 +2,7 @@ package at.blaulix.coreon;
 
 import at.blaulix.coreon.command.CoreonCommand;
 import at.blaulix.coreon.command.InvseeCommand;
+import at.blaulix.coreon.command.VanishCommand;
 import at.blaulix.coreon.handler.CoreonHandler;
 import at.blaulix.coreon.listener.CoreonListener;
 import at.blaulix.coreon.listener.QuitListener;
@@ -26,7 +27,7 @@ public final class Coreon extends JavaPlugin {
         //Commands
         Objects.requireNonNull(getCommand("coreon")).setExecutor(new CoreonCommand(coreonHandler));
         Objects.requireNonNull(getCommand("invsee")).setExecutor(new InvseeCommand());
-        //Objects.requireNonNull(getCommand("vanish")).setExecutor(new VanishCommand());
+        Objects.requireNonNull(getCommand("vanish")).setExecutor(new VanishCommand());
     }
 
     @Override

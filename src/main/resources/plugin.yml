@@ -11,7 +11,7 @@ commands:
     description: Öffnet das Inventar eines Spielers
     usage: /invsee <Spieler>
     permission: coreon.invsee
-  #vanish:
-  #  description: Verschwinde vor anderen Spielern
-  #  usage: /vanish
-  #  permission: coreon.vanish
+  vanish:
+    description: Verschwinde vor anderen Spielern
+    usage: /vanish
+    permission: coreon.vanish
