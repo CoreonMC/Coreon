@@ -6,6 +6,7 @@ import at.blaulix.coreon.command.VanishCommand;
 import at.blaulix.coreon.handler.CoreonHandler;
 import at.blaulix.coreon.handler.Database;
 import at.blaulix.coreon.listener.CoreonListener;
+import at.blaulix.coreon.listener.InvseeListener; // Neu hinzugefügt
 import at.blaulix.coreon.listener.QuitListener;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -18,16 +19,20 @@ public final class Coreon extends JavaPlugin {
     @Override
     public void onEnable() {
         saveDefaultConfig();
-        //Handler
+
+        // Handler
         CoreonHandler coreonHandler = new CoreonHandler(this);
         Database database = new Database(this);
         database.enableDatabase();
 
-        //Listener
+        // Listener
         getServer().getPluginManager().registerEvents(new QuitListener(), this);
         getServer().getPluginManager().registerEvents(new CoreonListener(coreonHandler), this);
 
-        //Commands
+        // HIER DIE ÄNDERUNG: Übergabe von 'this'
+        getServer().getPluginManager().registerEvents(new InvseeListener(this), this);
+
+        // Commands
         Objects.requireNonNull(getCommand("coreon")).setExecutor(new CoreonCommand(coreonHandler));
         Objects.requireNonNull(getCommand("invsee")).setExecutor(new InvseeCommand());
         Objects.requireNonNull(getCommand("vanish")).setExecutor(new VanishCommand());
