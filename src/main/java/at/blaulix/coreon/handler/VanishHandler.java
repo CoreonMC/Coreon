@@ -2,10 +2,7 @@ package at.blaulix.coreon.handler;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.Color;
 import org.bukkit.entity.Player;
-
-import static net.kyori.adventure.text.minimessage.tag.standard.StandardTags.color;
 import static org.bukkit.Bukkit.getServer;
 
 /**
