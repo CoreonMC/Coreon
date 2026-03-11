@@ -1,0 +1,25 @@
+max-homes:
+  default: 3   # Default maximum homes per player
+
+# Teleport Einstellungen
+teleport:
+  delay-seconds: 3       # Seconds to wait before teleporting (0 for instant)
+  cancel-on-move: true   # Cancel teleport if the player moves
+  cooldown-seconds: 10   # Cooldown between teleports (0 to disable)
+
+# Kosten (benötigt Vault + Economy Plugin)
+costs:
+  sethome: 0
+  home: 0
+  delhome: 0
+
+# Nachrichten
+messages:
+  prefix: "&8[&bHomes&8] "
+
+  home-set: "&aYour home has been set!"
+  home-deleted: "&cYour home has been deleted!"
+  home-teleport: "&aTeleporting to your home in {delay} seconds. Don't move!"
+  teleport-cancelled: "&cTeleport cancelled because you moved!"
+  no-home: "&cYou don't have a home set with that name!"
+  max-homes: "&cYou have reached the maximum number of homes!"

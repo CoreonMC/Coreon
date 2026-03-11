@@ -4,6 +4,7 @@ import at.blaulix.coreon.command.CoreonCommand;
 import at.blaulix.coreon.command.InvseeCommand;
 import at.blaulix.coreon.command.VanishCommand;
 import at.blaulix.coreon.handler.CoreonHandler;
+import at.blaulix.coreon.handler.Database;
 import at.blaulix.coreon.listener.CoreonListener;
 import at.blaulix.coreon.listener.QuitListener;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -19,6 +20,8 @@ public final class Coreon extends JavaPlugin {
         saveDefaultConfig();
         //Handler
         CoreonHandler coreonHandler = new CoreonHandler(this);
+        Database database = new Database(this);
+        database.enableDatabase();
 
         //Listener
         getServer().getPluginManager().registerEvents(new QuitListener(), this);
@@ -37,5 +40,9 @@ public final class Coreon extends JavaPlugin {
 
     public File getCommandDescriptions() {
         return commandDescriptions;
+    }
+
+    public File getHomesConfig() {
+        return new File(getDataFolder(), "homes.yml");
     }
 }
