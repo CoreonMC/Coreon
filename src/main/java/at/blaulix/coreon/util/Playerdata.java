@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 
 public class Playerdata {
+    /** Save player's inventory to a YAML file under plugins/Coreon/playerdata */
     public static void savePlayerData(Player player){
         File folder = new File("plugins/Coreon/playerdata");
         if (!folder.exists()) folder.mkdirs();
@@ -15,7 +16,7 @@ public class Playerdata {
         File file = new File(folder, player.getUniqueId() + ".yml");
         FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 
-        // Inventar in die Config schreiben (Bukkit kann ItemStacks direkt speichern!)
+        // Write inventory to config (Bukkit can store ItemStacks directly)
         config.set("inventory.content", player.getInventory().getContents());
 
         try {

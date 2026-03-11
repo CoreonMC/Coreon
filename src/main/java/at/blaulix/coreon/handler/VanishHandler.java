@@ -9,39 +9,44 @@ import static net.kyori.adventure.text.minimessage.tag.standard.StandardTags.col
 import static org.bukkit.Bukkit.getServer;
 
 /**
- * Simple handler for vanishing a player (makes them invisible and silent)
- * and notifying another player on the server.
+ * Handler to toggle a player's vanish state (invisible + silent) and notify
+ * a server player by UUID. Comments are short and in English.
  */
 public class VanishHandler {
     /**
-     * Make the given player vanish: mark invisible and silent, then send a
-     * short message to the server player returned by UUID lookup.
-     * Note: the server lookup may return null in some cases.
+     * Toggle vanish for the given player and notify the player found by UUID.
+     * If the lookup returns null, no message is sent.
      */
     public void vanishPlayer(Player player) {
         Player allPlayer = getServer().getPlayer(player.getUniqueId());
 
-        // Wir starten mit der Farbe Gold/Gelb
+        // Start with yellow text color for the message
         Component message = Component.text().color(NamedTextColor.YELLOW).build();
 
         if(!player.isInvisible()) {
             player.setInvisible(true);
             player.setSilent(true);
 
-            // WICHTIG: message = ... zuweisen!
+            // Reassign appended parts back to message (Component is immutable)
             message = message.append(player.displayName())
                     .append(Component.text(" left the game."));
 
-            allPlayer.sendMessage(message);
+            // allPlayer can be null if not found; check before sending
+            if (allPlayer != null) {
+                allPlayer.sendMessage(message);
+            }
         } else {
             player.setInvisible(false);
             player.setSilent(false);
 
-            // WICHTIG: message = ... zuweisen!
+            // Reassign appended parts back to message
             message = message.append(player.displayName())
                     .append(Component.text(" joined the game."));
 
-            allPlayer.sendMessage(message);
+            // allPlayer can be null; check before sending
+            if (allPlayer != null) {
+                allPlayer.sendMessage(message);
+            }
         }
     }
 
