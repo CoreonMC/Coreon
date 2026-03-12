@@ -8,23 +8,35 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.io.IOException;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class Database {
     private final JavaPlugin plugin;
     private Connection connection;
+    private final String databaseFileName;
+    private static final List<Database> all = new ArrayList<>();
 
-    public Database(JavaPlugin plugin) {
+    public Database(JavaPlugin plugin, String databaseFileName) {
         this.plugin = plugin;
+        this.databaseFileName = databaseFileName;
+        all.add(this);
+    }
+
+    public static List<Database> getAll(){
+        return all;
     }
 
     // Verbindung aufbauen und Tabelle erstellen
     public void connect() throws SQLException, IOException {
-        if (!plugin.getDataFolder().exists()) {
-            plugin.getDataFolder().mkdirs();
+        // Erstellt plugins/Coreon/databases/ falls nicht vorhanden
+        File databaseFolder = new File(plugin.getDataFolder(), "databases");
+        if (!databaseFolder.exists()) {
+            databaseFolder.mkdirs();
         }
 
-        File file = new File(plugin.getDataFolder(), "homes.db");
+        File file = new File(databaseFolder, databaseFileName);
         String url = "jdbc:sqlite:" + file.getPath();
 
         this.connection = DriverManager.getConnection(url);
@@ -83,6 +95,35 @@ public class Database {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public List<String> getHomes(UUID uuid) {
+        String sql = "SELECT name FROM player_homes WHERE uuid = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, uuid.toString());
+            ResultSet rs = pstmt.executeQuery();
+            List<String> homes = new ArrayList<>();
+            while (rs.next()) {
+                homes.add(rs.getString("name"));
+            }
+            // Hier kannst du die Liste der Homes zurückgeben oder weiterverarbeiten
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public int getHomeCount(UUID uuid) {
+        String sql = "SELECT COUNT(*) AS count FROM player_homes WHERE uuid = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, uuid.toString());
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("count");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     public void disconnect() {

@@ -11,6 +11,7 @@ import at.blaulix.coreon.listener.QuitListener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.util.List;
 import java.util.Objects;
 
 public final class Coreon extends JavaPlugin {
@@ -22,8 +23,10 @@ public final class Coreon extends JavaPlugin {
 
         // Handler
         CoreonHandler coreonHandler = new CoreonHandler(this);
-        Database database = new Database(this);
-        database.enableDatabase();
+
+        // Databases
+        Database homesDatabase = new Database(this, "homes.db");
+        homesDatabase.enableDatabase();
 
         // Listener
         getServer().getPluginManager().registerEvents(new QuitListener(), this);
@@ -36,11 +39,12 @@ public final class Coreon extends JavaPlugin {
         Objects.requireNonNull(getCommand("coreon")).setExecutor(new CoreonCommand(coreonHandler));
         Objects.requireNonNull(getCommand("invsee")).setExecutor(new InvseeCommand());
         Objects.requireNonNull(getCommand("vanish")).setExecutor(new VanishCommand());
+
     }
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
+        Database.getAll().forEach(Database::disconnect);
     }
 
     public File getCommandDescriptions() {
