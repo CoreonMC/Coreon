@@ -11,6 +11,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 
 public class Database {
     private final JavaPlugin plugin;
@@ -18,6 +19,7 @@ public class Database {
     private final String databaseFileName;
     private static final List<Database> all = new ArrayList<>();
 
+    // Track all Database instances
     public Database(JavaPlugin plugin, String databaseFileName) {
         this.plugin = plugin;
         this.databaseFileName = databaseFileName;
@@ -28,12 +30,15 @@ public class Database {
         return all;
     }
 
-    // Verbindung aufbauen und Tabelle erstellen
+    // Connect and create table
     public void connect() throws SQLException, IOException {
-        // Erstellt plugins/Coreon/databases/ falls nicht vorhanden
+        // Create plugins/Coreon/databases/ if missing
         File databaseFolder = new File(plugin.getDataFolder(), "databases");
         if (!databaseFolder.exists()) {
-            databaseFolder.mkdirs();
+            boolean created = databaseFolder.mkdirs();
+            if (!created) {
+                plugin.getLogger().warning("Could not create database folder: " + databaseFolder.getPath());
+            }
         }
 
         File file = new File(databaseFolder, databaseFileName);
@@ -48,19 +53,19 @@ public class Database {
         }
     }
 
-    // Hilfsmethode für deine Main-Klasse
+    // Called from main to enable the database connection
     public void enableDatabase() {
         try {
             connect();
-            plugin.getLogger().info("Datenbank erfolgreich verbunden!");
+            plugin.getLogger().info("Database connected successfully!");
         } catch (SQLException | IOException e) {
-            plugin.getLogger().severe("Konnte Datenbank nicht laden!");
-            e.printStackTrace();
+            plugin.getLogger().severe("Could not load database!");
+            plugin.getLogger().log(Level.SEVERE, "Failed to enable database", e);
             Bukkit.getPluginManager().disablePlugin(plugin);
         }
     }
 
-    // Home speichern (REPLACE überschreibt existierende Homes mit gleichem Namen)
+    // Save home (REPLACE overwrites homes with same name)
     public void saveHome(UUID uuid, String name, Location loc) {
         String sql = "REPLACE INTO player_homes (uuid, name, world, x, y, z, yaw, pitch) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -74,11 +79,11 @@ public class Database {
             pstmt.setFloat(8, loc.getPitch());
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            plugin.getLogger().log(Level.SEVERE, "Failed to save home", e);
         }
     }
 
-    // Home laden
+    // Load a named home for a player
     public Location getHome(UUID uuid, String name) {
         String sql = "SELECT * FROM player_homes WHERE uuid = ? AND name = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -92,11 +97,12 @@ public class Database {
                         rs.getFloat("yaw"), rs.getFloat("pitch"));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            plugin.getLogger().log(Level.SEVERE, "Failed to load home", e);
         }
         return null;
     }
 
+    // Return a list of a player's home names
     public List<String> getHomes(UUID uuid) {
         String sql = "SELECT name FROM player_homes WHERE uuid = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -106,12 +112,14 @@ public class Database {
             while (rs.next()) {
                 homes.add(rs.getString("name"));
             }
-            // Hier kannst du die Liste der Homes zurückgeben oder weiterverarbeiten
+            return homes; // return the list of homes
         } catch (SQLException e) {
-            e.printStackTrace();
+            plugin.getLogger().log(Level.SEVERE, "Failed to list homes", e);
         }
+        return new ArrayList<>();
     }
 
+    // Count how many homes a player has
     public int getHomeCount(UUID uuid) {
         String sql = "SELECT COUNT(*) AS count FROM player_homes WHERE uuid = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -121,16 +129,17 @@ public class Database {
                 return rs.getInt("count");
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            plugin.getLogger().log(Level.SEVERE, "Failed to count homes", e);
         }
         return 0;
     }
 
+    // Close DB connection
     public void disconnect() {
         try {
             if (connection != null && !connection.isClosed()) connection.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            plugin.getLogger().log(Level.SEVERE, "Failed to close database connection", e);
         }
     }
 }
