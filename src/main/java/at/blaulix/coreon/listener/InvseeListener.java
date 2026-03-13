@@ -10,13 +10,13 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 /**
- * Synchronizes the virtual InvSee GUI with the actual player's inventory.
+ * Sync InvSee GUI changes back to the real player's inventory.
  */
 public class InvseeListener implements Listener {
 
     private final Coreon plugin;
 
-    // Constructor to get the plugin instance for the scheduler
+    // Constructor to get plugin instance for scheduling
     public InvseeListener(Coreon plugin) {
         this.plugin = plugin;
     }
@@ -25,26 +25,26 @@ public class InvseeListener implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         String title = event.getView().getTitle();
 
-        // Check if the inventory is an InvSee GUI
+        // Only handle InvSee inventories
         if (!title.startsWith("§8InvSee §7")) return;
 
-        // Prevent interaction with the separator (Gray Glass Panes)
+        // Prevent interaction with separator slots
         if (event.getRawSlot() >= 36 && event.getRawSlot() <= 44) {
             event.setCancelled(true);
             return;
         }
 
-        // Only handle clicks within the top inventory (the GUI)
+        // Only handle top inventory clicks
         if (event.getRawSlot() >= event.getView().getTopInventory().getSize()) return;
 
         Player viewer = (Player) event.getWhoClicked();
         String targetName = title.replace("§8InvSee §7", "");
         Player target = plugin.getServer().getPlayer(targetName);
 
-        // Live sync only works if the target is online
+        // Live sync only works for online targets
         if (target == null || !target.isOnline()) return;
 
-        // Use the plugin instance to run the task
+        // Sync changes back to the target on the main thread
         plugin.getServer().getScheduler().runTask(plugin, () -> {
             syncToPlayer(event.getInventory(), target);
         });
@@ -61,7 +61,7 @@ public class InvseeListener implements Listener {
 
         if (target == null || !target.isOnline()) return;
 
-        // Sync after drag using the plugin instance
+        // Sync after drag on main thread
         plugin.getServer().getScheduler().runTask(plugin, () -> {
             syncToPlayer(event.getInventory(), target);
         });
@@ -73,7 +73,7 @@ public class InvseeListener implements Listener {
             target.getInventory().setItem(i, gui.getItem(i));
         }
 
-        // Sync Armor and Offhand (45-49)
+        // Sync armor and offhand
         target.getInventory().setHelmet(gui.getItem(45));
         target.getInventory().setChestplate(gui.getItem(46));
         target.getInventory().setLeggings(gui.getItem(47));

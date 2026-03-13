@@ -1,6 +1,5 @@
 package at.blaulix.coreon.command;
 
-import at.blaulix.coreon.Coreon;
 import at.blaulix.coreon.handler.VanishHandler;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -10,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class VanishCommand implements CommandExecutor {
 
+    // Handle /vanish command; only players with permission can use it
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args) {
         if (!sender.hasPermission("coreon.vanish")) {
@@ -27,4 +27,3 @@ public class VanishCommand implements CommandExecutor {
         }
     }
 }
-

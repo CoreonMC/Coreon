@@ -11,17 +11,22 @@ import java.util.List;
 import java.util.UUID;
 
 public class HomesHandler {
-    Coreon plugin;
+    // Plugin instance (Coreon) for config access
+    private final Coreon plugin;
+    // JavaPlugin reference used for scheduling tasks
     private final JavaPlugin javaPlugin;
     private final HomeDatabase homeDatabase;
 
-    public HomesHandler(JavaPlugin plugin, HomeDatabase homeDatabase) {
+    // Accept Coreon to access custom methods like getHomesConfig()
+    public HomesHandler(Coreon plugin, HomeDatabase homeDatabase) {
+        this.plugin = plugin;
         this.javaPlugin = plugin;
         this.homeDatabase = homeDatabase;
     }
 
     /**
-     * NICHT FERTIG!!!!!!!!!!!!!
+     * Save a home for the player asynchronously.
+     * Checks limit and informs player.
      */
     public void setHome(Player player, String homeName) {
         int homeLimit = plugin.getConfig().getInt("max-homes.default");
@@ -42,10 +47,12 @@ public class HomesHandler {
         });
     }
 
+    // Return number of homes for player
     public int getHomeCount(Player player) {
         return homeDatabase.getHomeCount(player.getUniqueId());
     }
 
+    // Teleport player to named home asynchronously
     public void teleportToHome(Player player, String homeName) {
         Bukkit.getScheduler().runTaskAsynchronously(javaPlugin, () -> {
             Location loc = homeDatabase.getHome(player.getUniqueId(), homeName);
@@ -66,6 +73,7 @@ public class HomesHandler {
         });
     }
 
+    // List player's homes and send them a message
     public void listHomes(Player player) {
         UUID playerUUID = player.getUniqueId();
         Bukkit.getScheduler().runTaskAsynchronously(javaPlugin, () -> {

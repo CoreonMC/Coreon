@@ -5,7 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
 
 /**
- * Handles the global PvP timer logic.
+ * Handles global PvP disable timer and notifications.
  */
 public class PvPTimerHandler {
 
@@ -18,10 +18,10 @@ public class PvPTimerHandler {
     }
 
     /**
-     * Starts a PvP-disable timer for a specific amount of minutes.
+     * Start a timer that disables PvP for given minutes.
      */
     public void startTimer(int minutes) {
-        // Cancel existing timer if one is running
+        // Cancel existing timer
         if (task != null) {
             task.cancel();
         }
@@ -39,12 +39,10 @@ public class PvPTimerHandler {
                 task.cancel();
                 task = null;
             }
-        }, 0L, 20L); // Run every second (20 ticks)
+        }, 0L, 20L); // run every second
     }
 
-    /**
-     * @return true if PvP is currently blocked by the timer.
-     */
+    // true if PvP is currently disabled
     public boolean isPvPDisabled() {
         return remainingSeconds > 0;
     }

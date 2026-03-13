@@ -20,26 +20,26 @@ public final class Coreon extends JavaPlugin {
     public void onEnable() {
         saveDefaultConfig();
 
-        // Handlers
+        // Handlers for GUI, PvP timer, etc.
         CoreonHandler coreonHandler = new CoreonHandler(this);
-        PvPTimerHandler pvpTimerHandler = new PvPTimerHandler(this); // New Handler for PvP Timer
+        PvPTimerHandler pvpTimerHandler = new PvPTimerHandler(this); // Handler for PvP timer
 
-        // Databases
+        // Initialize home database
         HomeDatabase homesHomeDatabase = new HomeDatabase(this, "homes.db");
         homesHomeDatabase.enableDatabase();
 
-        // Listeners
+        // Register event listeners
         getServer().getPluginManager().registerEvents(new QuitListener(), this);
         getServer().getPluginManager().registerEvents(new CoreonListener(coreonHandler), this);
         getServer().getPluginManager().registerEvents(new InvseeListener(this), this);
-        getServer().getPluginManager().registerEvents(new PvPTimerListener(pvpTimerHandler), this); // New Listener for PvP Timer
+        getServer().getPluginManager().registerEvents(new PvPTimerListener(pvpTimerHandler), this); // Listener for PvP timer
 
-        // Commands
+        // Register commands and their executors
         Objects.requireNonNull(getCommand("coreon")).setExecutor(new CoreonCommand(coreonHandler));
         Objects.requireNonNull(getCommand("invsee")).setExecutor(new InvseeCommand());
         Objects.requireNonNull(getCommand("vanish")).setExecutor(new VanishCommand());
         Objects.requireNonNull(getCommand("home")).setExecutor(new HomesCommand(this, homesHomeDatabase));
-        Objects.requireNonNull(getCommand("pvptimer")).setExecutor(new PvPTimerCommand(pvpTimerHandler)); // New Command for PvP Timer
+        Objects.requireNonNull(getCommand("pvptimer")).setExecutor(new PvPTimerCommand(pvpTimerHandler)); // Command for PvP timer
 
     }
 

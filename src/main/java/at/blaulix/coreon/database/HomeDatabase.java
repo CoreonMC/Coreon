@@ -28,9 +28,9 @@ public class HomeDatabase {
         return all;
     }
 
-    // Verbindung aufbauen und Tabelle erstellen
+    // Connect and create table if missing
     public void connect() throws SQLException, IOException {
-        // Erstellt plugins/Coreon/databases/ falls nicht vorhanden
+        // Ensure plugins/Coreon/databases/ exists
         File databaseFolder = new File(plugin.getDataFolder(), "databases");
         if (!databaseFolder.exists()) {
             databaseFolder.mkdirs();
@@ -48,19 +48,19 @@ public class HomeDatabase {
         }
     }
 
-    // Hilfsmethode für deine Main-Klasse
+    // Helper to enable DB at plugin startup
     public void enableDatabase() {
         try {
             connect();
-            plugin.getLogger().info("Datenbank erfolgreich verbunden!");
+            plugin.getLogger().info("Database connected successfully!");
         } catch (SQLException | IOException e) {
-            plugin.getLogger().severe("Konnte Datenbank nicht laden!");
+            plugin.getLogger().severe("Failed to load database!");
             e.printStackTrace();
             Bukkit.getPluginManager().disablePlugin(plugin);
         }
     }
 
-    // Home speichern (REPLACE überschreibt existierende Homes mit gleichem Namen)
+    // Save home (REPLACE will overwrite existing home with same name)
     public void saveHome(UUID uuid, String name, Location loc) {
         String sql = "REPLACE INTO player_homes (uuid, name, world, x, y, z, yaw, pitch) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -78,7 +78,7 @@ public class HomeDatabase {
         }
     }
 
-    // Home laden
+    // Load a home by name
     public Location getHome(UUID uuid, String name) {
         String sql = "SELECT * FROM player_homes WHERE uuid = ? AND name = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -97,6 +97,7 @@ public class HomeDatabase {
         return null;
     }
 
+    // Return list of home names for player
     public List<String> getHomesList(UUID uuid) {
         String sql = "SELECT name FROM player_homes WHERE uuid = ?";
         List<String> homes = new ArrayList<>();
@@ -107,7 +108,7 @@ public class HomeDatabase {
             while (rs.next()) {
                 homes.add(rs.getString("name"));
             }
-            // Hier kannst du die Liste der Homes zurückgeben oder weiterverarbeiten
+            // list collected
         } catch (SQLException e) {
             e.printStackTrace();
         }
