@@ -97,12 +97,13 @@ public class Database {
         return null;
     }
 
-    public List<String> getHomes(UUID uuid) {
+    public List<String> getHomesList(UUID uuid) {
         String sql = "SELECT name FROM player_homes WHERE uuid = ?";
+        List<String> homes = new ArrayList<>();
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, uuid.toString());
             ResultSet rs = pstmt.executeQuery();
-            List<String> homes = new ArrayList<>();
+            homes = new ArrayList<>();
             while (rs.next()) {
                 homes.add(rs.getString("name"));
             }
@@ -110,6 +111,7 @@ public class Database {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return homes;
     }
 
     public int getHomeCount(UUID uuid) {

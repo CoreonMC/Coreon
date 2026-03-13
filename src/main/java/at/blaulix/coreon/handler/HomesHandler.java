@@ -23,7 +23,6 @@ public class HomesHandler {
      * NICHT FERTIG!!!!!!!!!!!!!
      */
     public void setHome(Player player, String homeName) {
-        UUID playerUUID = player.getUniqueId();
         int homeLimit = plugin.getConfig().getInt("max-homes.default");
         if(getHomeCount(player) >= homeLimit){
             String message = plugin.getHomesConfig().getPath() + ".message.home-limit-reached";
@@ -69,11 +68,11 @@ public class HomesHandler {
     public void listHomes(Player player) {
         UUID playerUUID = player.getUniqueId();
         Bukkit.getScheduler().runTaskAsynchronously(javaPlugin, () -> {
-            //List[] homes = database.getHomes(playerUUID);
+            List<String> homes = database.getHomesList(playerUUID);
             String message = plugin.getHomesConfig().getPath() + ".message.home-list";
-            //String editedMessage = message.replace("%homes%", String.join(", ", homes));
-            //Bukkit.getScheduler().runTask(javaPlugin, () ->
-            //        player.sendMessage(editedMessage));
+            String editedMessage = message.replace("%homes%", String.join(", ", homes));
+            Bukkit.getScheduler().runTask(javaPlugin, () ->
+                    player.sendMessage(editedMessage));
         });
     }
 }
