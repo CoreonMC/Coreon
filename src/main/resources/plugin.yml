@@ -15,6 +15,10 @@ commands:
     description: Verschwinde vor anderen Spielern
     usage: /vanish
     permission: coreon.vanish
+  home:
+    description: Gives you homes.
+    usage: /home
+    permission: coreon.home
   pvptimer:
     description: Sets a global PvP disable timer.
     usage: /pvptimer <minutes>

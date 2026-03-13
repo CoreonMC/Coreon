@@ -1,9 +1,6 @@
 package at.blaulix.coreon;
 
-import at.blaulix.coreon.command.CoreonCommand;
-import at.blaulix.coreon.command.InvseeCommand;
-import at.blaulix.coreon.command.PvPTimerCommand;
-import at.blaulix.coreon.command.VanishCommand;
+import at.blaulix.coreon.command.*;
 import at.blaulix.coreon.handler.CoreonHandler;
 import at.blaulix.coreon.database.HomeDatabase;
 import at.blaulix.coreon.handler.PvPTimerHandler;
@@ -41,6 +38,7 @@ public final class Coreon extends JavaPlugin {
         Objects.requireNonNull(getCommand("coreon")).setExecutor(new CoreonCommand(coreonHandler));
         Objects.requireNonNull(getCommand("invsee")).setExecutor(new InvseeCommand());
         Objects.requireNonNull(getCommand("vanish")).setExecutor(new VanishCommand());
+        Objects.requireNonNull(getCommand("home")).setExecutor(new HomesCommand(this, homesHomeDatabase));
         Objects.requireNonNull(getCommand("pvptimer")).setExecutor(new PvPTimerCommand(pvpTimerHandler)); // New Command for PvP Timer
 
     }
