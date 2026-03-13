@@ -1,4 +1,4 @@
-package at.blaulix.coreon.handler;
+package at.blaulix.coreon.database;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -12,19 +12,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class Database {
+public class HomeDatabase {
     private final JavaPlugin plugin;
     private Connection connection;
     private final String databaseFileName;
-    private static final List<Database> all = new ArrayList<>();
+    private static final List<HomeDatabase> all = new ArrayList<>();
 
-    public Database(JavaPlugin plugin, String databaseFileName) {
+    public HomeDatabase(JavaPlugin plugin, String databaseFileName) {
         this.plugin = plugin;
         this.databaseFileName = databaseFileName;
         all.add(this);
     }
 
-    public static List<Database> getAll(){
+    public static List<HomeDatabase> getAll(){
         return all;
     }
 

@@ -1,6 +1,7 @@
 package at.blaulix.coreon.handler;
 
 import at.blaulix.coreon.Coreon;
+import at.blaulix.coreon.database.HomeDatabase;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -12,11 +13,11 @@ import java.util.UUID;
 public class HomesHandler {
     Coreon plugin;
     private final JavaPlugin javaPlugin;
-    private final Database database;
+    private final HomeDatabase homeDatabase;
 
-    public HomesHandler(JavaPlugin plugin, Database database) {
+    public HomesHandler(JavaPlugin plugin, HomeDatabase homeDatabase) {
         this.javaPlugin = plugin;
-        this.database = database;
+        this.homeDatabase = homeDatabase;
     }
 
     /**
@@ -35,19 +36,19 @@ public class HomesHandler {
         String message = plugin.getHomesConfig().getPath() + ".message.sethome";
         String editedMessage = message.replace("%home%", homeName);
         Bukkit.getScheduler().runTaskAsynchronously(javaPlugin, () -> {
-            database.saveHome(player.getUniqueId(), homeName, loc);
+            homeDatabase.saveHome(player.getUniqueId(), homeName, loc);
             Bukkit.getScheduler().runTask(javaPlugin, () ->
                     player.sendMessage(editedMessage));
         });
     }
 
     public int getHomeCount(Player player) {
-        return database.getHomeCount(player.getUniqueId());
+        return homeDatabase.getHomeCount(player.getUniqueId());
     }
 
     public void teleportToHome(Player player, String homeName) {
         Bukkit.getScheduler().runTaskAsynchronously(javaPlugin, () -> {
-            Location loc = database.getHome(player.getUniqueId(), homeName);
+            Location loc = homeDatabase.getHome(player.getUniqueId(), homeName);
 
             String tpMessage = plugin.getHomesConfig().getPath() + ".message.home-teleported";
             String tpMessageEdited = tpMessage.replace("%home%", homeName);
@@ -68,7 +69,7 @@ public class HomesHandler {
     public void listHomes(Player player) {
         UUID playerUUID = player.getUniqueId();
         Bukkit.getScheduler().runTaskAsynchronously(javaPlugin, () -> {
-            List<String> homes = database.getHomesList(playerUUID);
+            List<String> homes = homeDatabase.getHomesList(playerUUID);
             String message = plugin.getHomesConfig().getPath() + ".message.home-list";
             String editedMessage = message.replace("%homes%", String.join(", ", homes));
             Bukkit.getScheduler().runTask(javaPlugin, () ->

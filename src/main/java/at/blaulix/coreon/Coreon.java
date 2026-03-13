@@ -5,7 +5,7 @@ import at.blaulix.coreon.command.InvseeCommand;
 import at.blaulix.coreon.command.PvPTimerCommand;
 import at.blaulix.coreon.command.VanishCommand;
 import at.blaulix.coreon.handler.CoreonHandler;
-import at.blaulix.coreon.handler.Database;
+import at.blaulix.coreon.database.HomeDatabase;
 import at.blaulix.coreon.handler.PvPTimerHandler;
 import at.blaulix.coreon.listener.CoreonListener;
 import at.blaulix.coreon.listener.InvseeListener;
@@ -28,8 +28,8 @@ public final class Coreon extends JavaPlugin {
         PvPTimerHandler pvpTimerHandler = new PvPTimerHandler(this); // New Handler for PvP Timer
 
         // Databases
-        Database homesDatabase = new Database(this, "homes.db");
-        homesDatabase.enableDatabase();
+        HomeDatabase homesHomeDatabase = new HomeDatabase(this, "homes.db");
+        homesHomeDatabase.enableDatabase();
 
         // Listeners
         getServer().getPluginManager().registerEvents(new QuitListener(), this);
@@ -47,7 +47,7 @@ public final class Coreon extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        Database.getAll().forEach(Database::disconnect);
+        HomeDatabase.getAll().forEach(HomeDatabase::disconnect);
     }
 
     public File getCommandDescriptions() {
