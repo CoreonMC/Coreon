@@ -37,7 +37,7 @@ public final class Coreon extends JavaPlugin {
         // Register commands and their executors
         Objects.requireNonNull(getCommand("coreon")).setExecutor(new CoreonCommand(coreonHandler));
         Objects.requireNonNull(getCommand("invsee")).setExecutor(new InvseeCommand());
-        Objects.requireNonNull(getCommand("vanish")).setExecutor(new VanishCommand());
+        Objects.requireNonNull(getCommand("vanish")).setExecutor(new VanishCommand(this));
         Objects.requireNonNull(getCommand("home")).setExecutor(new HomesCommand(this, homesHomeDatabase));
         Objects.requireNonNull(getCommand("pvptimer")).setExecutor(new PvPTimerCommand(pvpTimerHandler)); // Command for PvP timer
 

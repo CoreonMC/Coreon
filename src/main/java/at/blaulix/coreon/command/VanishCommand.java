@@ -1,5 +1,6 @@
 package at.blaulix.coreon.command;
 
+import at.blaulix.coreon.Coreon; // Import deiner Hauptklasse
 import at.blaulix.coreon.handler.VanishHandler;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -9,7 +10,13 @@ import org.jetbrains.annotations.NotNull;
 
 public class VanishCommand implements CommandExecutor {
 
-    // Handle /vanish command; only players with permission can use it
+    private final Coreon plugin;
+
+    // Konstruktor hinzugefügt, um das Plugin zu empfangen
+    public VanishCommand(Coreon plugin) {
+        this.plugin = plugin;
+    }
+
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args) {
         if (!sender.hasPermission("coreon.vanish")) {
@@ -17,9 +24,13 @@ public class VanishCommand implements CommandExecutor {
             return false;
         }
         if (sender instanceof Player player) {
-            VanishHandler vanishHandler = new VanishHandler();
+            // Plugin-Instanz an den Handler weitergeben
+            VanishHandler vanishHandler = new VanishHandler(plugin);
             vanishHandler.vanishPlayer(player);
-            player.sendMessage("You are now vanished!");
+
+            // Nachricht angepasst, damit sie zum Status passt
+            String status = player.isInvisible() ? "vanished" : "visible";
+            player.sendMessage("You are now " + status + "!");
             return true;
         } else {
             sender.sendMessage("Only players can use this command.");
