@@ -1,13 +1,11 @@
 package at.blaulix.coreon;
 
 import at.blaulix.coreon.command.*;
-import at.blaulix.coreon.handler.CoreonHandler;
 import at.blaulix.coreon.database.HomeDatabase;
+import at.blaulix.coreon.handler.CoreonHandler;
 import at.blaulix.coreon.handler.PvPTimerHandler;
-import at.blaulix.coreon.listener.CoreonListener;
-import at.blaulix.coreon.listener.InvseeListener;
-import at.blaulix.coreon.listener.PvPTimerListener;
-import at.blaulix.coreon.listener.QuitListener;
+import at.blaulix.coreon.handler.VanishHandler;
+import at.blaulix.coreon.listener.*;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -20,27 +18,30 @@ public final class Coreon extends JavaPlugin {
     public void onEnable() {
         saveDefaultConfig();
 
-        // Handlers for GUI, PvP timer, etc.
+        // 1. Handlers initialisieren
         CoreonHandler coreonHandler = new CoreonHandler(this);
-        PvPTimerHandler pvpTimerHandler = new PvPTimerHandler(this); // Handler for PvP timer
+        PvPTimerHandler pvpTimerHandler = new PvPTimerHandler(this);
+        VanishHandler vanishHandler = new VanishHandler(this); // Zentraler Handler
 
-        // Initialize home database
+        // 2. Datenbank
         HomeDatabase homesHomeDatabase = new HomeDatabase(this, "homes.db");
         homesHomeDatabase.enableDatabase();
 
-        // Register event listeners
+        // 3. Listener registrieren (Wichtig: vanishHandler übergeben!)
         getServer().getPluginManager().registerEvents(new QuitListener(), this);
         getServer().getPluginManager().registerEvents(new CoreonListener(coreonHandler), this);
         getServer().getPluginManager().registerEvents(new InvseeListener(this), this);
-        getServer().getPluginManager().registerEvents(new PvPTimerListener(pvpTimerHandler), this); // Listener for PvP timer
+        getServer().getPluginManager().registerEvents(new PvPTimerListener(pvpTimerHandler), this);
+        getServer().getPluginManager().registerEvents(new VanishListener(this, vanishHandler), this);
 
-        // Register commands and their executors
+        // 4. Commands registrieren
         Objects.requireNonNull(getCommand("coreon")).setExecutor(new CoreonCommand(coreonHandler));
         Objects.requireNonNull(getCommand("invsee")).setExecutor(new InvseeCommand());
-        Objects.requireNonNull(getCommand("vanish")).setExecutor(new VanishCommand(this));
         Objects.requireNonNull(getCommand("home")).setExecutor(new HomesCommand(this, homesHomeDatabase));
-        Objects.requireNonNull(getCommand("pvptimer")).setExecutor(new PvPTimerCommand(pvpTimerHandler)); // Command for PvP timer
+        Objects.requireNonNull(getCommand("pvptimer")).setExecutor(new PvPTimerCommand(pvpTimerHandler));
 
+        // WICHTIG: Hier muss der zentrale vanishHandler rein, kein "new VanishHandler(this)"!
+        Objects.requireNonNull(getCommand("vanish")).setExecutor(new VanishCommand(vanishHandler));
     }
 
     @Override

@@ -1,5 +1,6 @@
 package at.blaulix.coreon.command;
 
+import at.blaulix.coreon.Coreon;
 import at.blaulix.coreon.database.HomeDatabase;
 import at.blaulix.coreon.handler.HomesHandler;
 import org.bukkit.command.CommandExecutor;
@@ -18,7 +19,7 @@ public class HomesCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(org.bukkit.command.CommandSender sender, org.bukkit.command.Command command, String label, String[] args) {
-        HomesHandler homesHandler = new HomesHandler(javaPlugin, homeDatabase);
+        HomesHandler homesHandler = new HomesHandler((Coreon) javaPlugin, homeDatabase);
         Player player = (Player) sender;
         if (args[0].equalsIgnoreCase("set")) {
             homesHandler.setHome(player, args[1]);

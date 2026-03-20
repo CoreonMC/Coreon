@@ -1,49 +1,55 @@
 package at.blaulix.coreon.handler;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 public class VanishHandler {
-
     private final Plugin plugin;
+    private final Set<UUID> vanishedPlayers = new HashSet<>();
 
-    // Wir brauchen das Plugin für die hidePlayer Methode
     public VanishHandler(Plugin plugin) {
         this.plugin = plugin;
     }
 
     public void vanishPlayer(Player player) {
-        Component message = (Component) Component.text().color(NamedTextColor.YELLOW);
+        UUID uuid = player.getUniqueId();
 
-        if (!player.isInvisible()) {
+        if (!vanishedPlayers.contains(uuid)) {
+            vanishedPlayers.add(uuid);
+            // Unsichtbarkeit & Kollision
             player.setInvisible(true);
-            player.setSilent(true);
+            player.setCollidable(false);
             player.setInvulnerable(true);
+            player.setSilent(true);
 
-            // Entfernt den Spieler für alle anderen aus der Tabliste und der Welt
-            for (Player online : Bukkit.getOnlinePlayers()) {
-                if (!online.equals(player)) {
-                    online.hidePlayer(plugin, player);
+            // Für alle anderen Spieler auf dem Server verstecken
+            for (Player target : Bukkit.getOnlinePlayers()) {
+                if (!target.equals(player)) {
+                    target.hidePlayer(plugin, player);
                 }
             }
-
-            message = message.append(player.displayName()).append(Component.text(" left the game."));
-            Bukkit.broadcast(message); // Nachricht an alle senden
         } else {
+            vanishedPlayers.remove(uuid);
+            // Wieder sichtbar machen
             player.setInvisible(false);
-            player.setSilent(false);
+            player.setCollidable(true);
             player.setInvulnerable(false);
+            player.setSilent(false);
 
-            // Fügt den Spieler für alle wieder zur Tabliste und Welt hinzu
-            for (Player online : Bukkit.getOnlinePlayers()) {
-                online.showPlayer(plugin, player);
+            // Für alle wieder anzeigen
+            for (Player target : Bukkit.getOnlinePlayers()) {
+                if (!target.equals(player)) {
+                    target.showPlayer(plugin, player);
+                }
             }
-
-            message = message.append(player.displayName()).append(Component.text(" joined the game."));
-            Bukkit.broadcast(message); // Nachricht an alle senden
         }
+    }
+
+    public Set<UUID> getVanishedPlayers() {
+        return vanishedPlayers;
     }
 }
