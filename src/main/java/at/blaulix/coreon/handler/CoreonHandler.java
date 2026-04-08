@@ -152,6 +152,9 @@ public class CoreonHandler {
         plugin.getConfig().set("modules." + key, newValue);
         plugin.saveConfig();
 
+        // Live-Update: Command aktivieren oder deaktivieren ohne Restart
+        plugin.applyModule(key);
+
         partSettings(key, player);
     }
 

@@ -1,5 +1,7 @@
 package at.blaulix.coreon.handler;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -25,11 +27,13 @@ public class VanishHandler {
             player.setCollidable(false);
             player.setInvulnerable(true);
             player.setSilent(true);
+            player.sendActionBar(Component.text("Willkommen auf dem Server!", NamedTextColor.GOLD));
 
             // Für alle anderen Spieler auf dem Server verstecken
             for (Player target : Bukkit.getOnlinePlayers()) {
                 if (!target.equals(player)) {
                     target.hidePlayer(plugin, player);
+                    target.sendMessage("§e" + player.getName() + " left the game.");
                 }
             }
         } else {
@@ -44,6 +48,7 @@ public class VanishHandler {
             for (Player target : Bukkit.getOnlinePlayers()) {
                 if (!target.equals(player)) {
                     target.showPlayer(plugin, player);
+                    target.sendMessage("§e" + player.getName() + " joined the game.");
                 }
             }
         }

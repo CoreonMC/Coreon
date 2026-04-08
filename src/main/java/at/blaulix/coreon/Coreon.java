@@ -1,6 +1,6 @@
 package at.blaulix.coreon;
 
-import at.blaulix.coreon.command.*;
+import at.blaulix.coreon.command.CoreonCommand;
 import at.blaulix.coreon.database.HomeDatabase;
 import at.blaulix.coreon.handler.CoreonHandler;
 import at.blaulix.coreon.handler.PvPTimerHandler;
@@ -14,6 +14,8 @@ import java.util.Objects;
 public final class Coreon extends JavaPlugin {
     private final File commandDescriptions = new File(getDataFolder(), "command_descriptions.yml");
 
+    private ModuleManager moduleManager;
+
     @Override
     public void onEnable() {
         saveDefaultConfig();
@@ -21,32 +23,37 @@ public final class Coreon extends JavaPlugin {
         // 1. Handlers initialisieren
         CoreonHandler coreonHandler = new CoreonHandler(this);
         PvPTimerHandler pvpTimerHandler = new PvPTimerHandler(this);
-        VanishHandler vanishHandler = new VanishHandler(this); // Zentraler Handler
+        VanishHandler vanishHandler = new VanishHandler(this);
 
         // 2. Datenbank
         HomeDatabase homesHomeDatabase = new HomeDatabase(this, "homes.db");
         homesHomeDatabase.enableDatabase();
 
-        // 3. Listener registrieren (Wichtig: vanishHandler übergeben!)
+        // 3. ModuleManager erstellen und initial anwenden (setzt Commands auf aktiv/deaktiviert)
+        moduleManager = new ModuleManager(this, pvpTimerHandler, vanishHandler, homesHomeDatabase);
+        moduleManager.applyAll();
+
+        // 4. Listener registrieren
         getServer().getPluginManager().registerEvents(new QuitListener(), this);
         getServer().getPluginManager().registerEvents(new CoreonListener(coreonHandler), this);
         getServer().getPluginManager().registerEvents(new InvseeListener(this), this);
         getServer().getPluginManager().registerEvents(new PvPTimerListener(pvpTimerHandler), this);
         getServer().getPluginManager().registerEvents(new VanishListener(this, vanishHandler), this);
 
-        // 4. Commands registrieren
+        // 5. Coreon-Command registrieren (immer aktiv, kein Modul)
         Objects.requireNonNull(getCommand("coreon")).setExecutor(new CoreonCommand(coreonHandler));
-        Objects.requireNonNull(getCommand("invsee")).setExecutor(new InvseeCommand());
-        Objects.requireNonNull(getCommand("home")).setExecutor(new HomesCommand(this, homesHomeDatabase));
-        Objects.requireNonNull(getCommand("pvptimer")).setExecutor(new PvPTimerCommand(pvpTimerHandler));
-
-        // WICHTIG: Hier muss der zentrale vanishHandler rein, kein "new VanishHandler(this)"!
-        Objects.requireNonNull(getCommand("vanish")).setExecutor(new VanishCommand(vanishHandler));
     }
 
     @Override
     public void onDisable() {
         HomeDatabase.getAll().forEach(HomeDatabase::disconnect);
+    }
+
+    /** Wird von CoreonHandler nach einem Modul-Toggle aufgerufen, um Commands live zu updaten. */
+    public void applyModule(String key) {
+        if (moduleManager != null) {
+            moduleManager.apply(key);
+        }
     }
 
     public File getCommandDescriptions() {
