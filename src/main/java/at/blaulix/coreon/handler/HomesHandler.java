@@ -3,6 +3,7 @@ package at.blaulix.coreon.handler;
 import at.blaulix.coreon.Coreon;
 import at.blaulix.coreon.database.HomeDatabase;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -30,16 +31,20 @@ public class HomesHandler {
      */
     public void setHome(Player player, String homeName) {
         int homeLimit = plugin.getConfig().getInt("max-homes.default");
-        if(getHomeCount(player) >= homeLimit){
-            String message = plugin.getHomesConfig().getPath() + ".message.home-limit-reached";
-            String editedMessage = message.replace("%limit%", String.valueOf(homeLimit));
-            player.sendMessage(editedMessage);
+        if (getHomeCount(player) >= homeLimit) {
+            String raw = plugin.getHomesConfig().getString("messages.max-homes",
+                    "&cYou have reached the maximum number of homes (%limit%)!");
+            String msg = ChatColor.translateAlternateColorCodes('&',
+                    raw.replace("%limit%", String.valueOf(homeLimit)));
+            player.sendMessage(msg);
             return;
         }
 
         Location loc = player.getLocation();
-        String message = plugin.getHomesConfig().getPath() + ".message.sethome";
-        String editedMessage = message.replace("%home%", homeName);
+        String raw = plugin.getHomesConfig().getString("messages.home-set",
+                "&aHome &b%home%&a has been set!");
+        String editedMessage = ChatColor.translateAlternateColorCodes('&',
+                raw.replace("%home%", homeName));
         Bukkit.getScheduler().runTaskAsynchronously(javaPlugin, () -> {
             homeDatabase.saveHome(player.getUniqueId(), homeName, loc);
             Bukkit.getScheduler().runTask(javaPlugin, () ->
@@ -57,17 +62,22 @@ public class HomesHandler {
         Bukkit.getScheduler().runTaskAsynchronously(javaPlugin, () -> {
             Location loc = homeDatabase.getHome(player.getUniqueId(), homeName);
 
-            String tpMessage = plugin.getHomesConfig().getPath() + ".message.home-teleported";
-            String tpMessageEdited = tpMessage.replace("%home%", homeName);
+            String tpRaw = plugin.getHomesConfig().getString("messages.home-teleported",
+                    "&aTeleported to home &b%home%&a!");
+            String tpMsg = ChatColor.translateAlternateColorCodes('&',
+                    tpRaw.replace("%home%", homeName));
 
-            String notExistMessage = plugin.getHomesConfig().getPath() + ".message.home-not-exist";
-            String notExistMessageEdited = notExistMessage.replace("%home%", homeName);
+            String notExistRaw = plugin.getHomesConfig().getString("messages.home-not-exist",
+                    "&cNo home named &b%home%&c found!");
+            String notExistMsg = ChatColor.translateAlternateColorCodes('&',
+                    notExistRaw.replace("%home%", homeName));
+
             Bukkit.getScheduler().runTask(javaPlugin, () -> {
                 if (loc != null) {
                     player.teleport(loc);
-                    player.sendMessage(tpMessageEdited);
+                    player.sendMessage(tpMsg);
                 } else {
-                    player.sendMessage(notExistMessageEdited);
+                    player.sendMessage(notExistMsg);
                 }
             });
         });
@@ -78,10 +88,12 @@ public class HomesHandler {
         UUID playerUUID = player.getUniqueId();
         Bukkit.getScheduler().runTaskAsynchronously(javaPlugin, () -> {
             List<String> homes = homeDatabase.getHomesList(playerUUID);
-            String message = plugin.getHomesConfig().getPath() + ".message.home-list";
-            String editedMessage = message.replace("%homes%", String.join(", ", homes));
+            String raw = plugin.getHomesConfig().getString("messages.home-list",
+                    "&aYour homes: &b%homes%");
+            String msg = ChatColor.translateAlternateColorCodes('&',
+                    raw.replace("%homes%", homes.isEmpty() ? "none" : String.join(", ", homes)));
             Bukkit.getScheduler().runTask(javaPlugin, () ->
-                    player.sendMessage(editedMessage));
+                    player.sendMessage(msg));
         });
     }
 }

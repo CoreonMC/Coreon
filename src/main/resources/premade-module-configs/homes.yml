@@ -18,11 +18,13 @@ messages:
   prefix: "&8[&bHomes&8] "
 
   # %home% = Home name, %delay% = Teleport delay in seconds, %cooldown% = Cooldown time in seconds
-  home-set: "&aYour home has been set!"
+  home-set: "&aHome &b%home% &ahas been set!"
   home-deleted: "&cYour home has been deleted!"
   home-teleport: "&aTeleporting to your home in {delay} seconds. Don't move!"
-  home-teleported: "&aYou have been teleported to your home!"
+  home-teleported: "&aTeleported to home &b%home%&a!"
   teleport-cancelled: "&cTeleport cancelled because you moved!"
-  home-not-exist: "&cYou don't have a home set with that name!"
+  home-not-exist: "&cNo home named &b%home%&c found!"
   # %limit% = Maximum number of homes allowed
-  max-homes: "&cYou have reached the maximum number of homes!"
+  max-homes: "&cYou have reached the maximum number of homes &7(%limit%)&c!"
+  # %homes% = Comma-separated list of home names
+  home-list: "&aYour homes: &b%homes%"
