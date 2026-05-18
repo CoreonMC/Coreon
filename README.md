@@ -7,17 +7,17 @@ Architektur und Persistenz (z. B. lokale DB/YAML) sind so organisiert,
 dass Zustände, Business‑Logik und Modulverwaltung sauber getrennt und live aktualisierbar sind.
 
 ## Muss-Ziele:
-- [x] Über GUI Ingame einstellbar (Flixlix)
-- [x] Mehrer Module (Flixlix + Nilsch)
-- [ ] Invsee (Nilsch)
-- [ ] Homes (Flixlix)
-- [x] Vanish (Nilsch + Flixlix)
-- [x] leicht bedienbar (Flixlix + Nilsch)
+- [x] Module über Ingame GUI einstellbar (Flixlix)
+- [x] Mehrer Module erstllen (Flixlix + Nilsch)
+- [ ] Invsee - Inventar eines Spielers anschauen und in echtzeit Items rausnehmen können(Nilsch)
+- [ ] Homes - Home setzen /sethome <name>, teleportieren zum Home /home <name>, löschen von Home /deletehome <name>(Flixlix)
+- [x] Vanish - Unsichtbar für jeden und so als wäre man offline /vanish (Nilsch + Flixlix)
+- [x] leicht bedienbar - DAU-Friendly(Flixlix + Nilsch)
 
 ## Kann-Ziele:
 - [ ] Invsee bei offline-Spielern
-- [ ] ec - ecsee
-- [ ] Vanish bei fehlenden Perms aus
-- [ ] warps
-- [ ] rtp - tpa
-- [ ] config über Website
+- [ ] ec; ecsee - Enderchest von sich selbst oder eines anderen Spielers anschauen und in Items rausnehmen können
+- [ ] Bei rejoin prüfen ob Spieler vanish perms hat
+- [ ] warps - warp setzen /setwarp <name>, teleportieren zu warp /warp <name>, löschen von warp /deletewarp <name> (Admin-Only)
+- [ ] rtp; tpa - rtp(Random Teleport) in gewissem Radius tpt werden, tpa (Teleport Anfrage) an andere Spieler senden und annehmen/ablehnen können
+- [ ] config über Website - GUI statt nur Ingame auch per Webinterface
