@@ -17,3 +17,4 @@ dass Zustände, Business‑Logik und Modulverwaltung sauber getrennt und live ak
 - [ ] Vanish bei fehlenden Perms aus
 - [ ] warps
 - [ ] rtp - tpa
+Test
