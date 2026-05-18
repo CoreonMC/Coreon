@@ -2,7 +2,8 @@
 modules:
   invsee: true
   vanish: true
-
+  pvptimer: true
+  homes: true
 
 
 config:

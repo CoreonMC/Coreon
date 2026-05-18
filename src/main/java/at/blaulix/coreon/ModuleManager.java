@@ -51,7 +51,7 @@ public class ModuleManager {
         realExecutors.put("invsee",    new InvseeCommand());
         realExecutors.put("vanish",    new VanishCommand(vanishHandler));
         realExecutors.put("pvptimer",  new PvPTimerCommand(pvpTimerHandler));
-        realExecutors.put("home",      new HomesCommand(plugin, homeDatabase));
+        realExecutors.put("homes",      new HomesCommand(plugin, homeDatabase));
     }
 
     /**

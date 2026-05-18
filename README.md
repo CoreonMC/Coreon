@@ -7,13 +7,17 @@ Architektur und Persistenz (z. B. lokale DB/YAML) sind so organisiert,
 dass Zustände, Business‑Logik und Modulverwaltung sauber getrennt und live aktualisierbar sind.
 
 ## Muss-Ziele:
-- [x] Über GUI Ingame einstellbar
-- [x] Mehrer Module (Invsee, Vanish, Homes)
-- [x] leicht bedienbar
+- [x] Über GUI Ingame einstellbar (Flixlix)
+- [x] Mehrer Module (Flixlix + Nilsch)
+- [ ] Invsee (Nilsch)
+- [ ] Homes (Flixlix)
+- [x] Vanish (Nilsch + Flixlix)
+- [x] leicht bedienbar (Flixlix + Nilsch)
 
 ## Kann-Ziele:
 - [ ] Invsee bei offline-Spielern
-- [ ] /ec - /ecsee
+- [ ] ec - ecsee
 - [ ] Vanish bei fehlenden Perms aus
 - [ ] warps
 - [ ] rtp - tpa
+- [ ] config über Website
