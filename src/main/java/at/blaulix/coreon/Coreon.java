@@ -6,19 +6,26 @@ import at.blaulix.coreon.handler.CoreonHandler;
 import at.blaulix.coreon.handler.PvPTimerHandler;
 import at.blaulix.coreon.handler.VanishHandler;
 import at.blaulix.coreon.listener.*;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.Objects;
 
 public final class Coreon extends JavaPlugin {
     private final File commandDescriptions = new File(getDataFolder(), "command_descriptions.yml");
 
     private ModuleManager moduleManager;
+    private FileConfiguration homesConfig;
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
+        loadHomesConfig();
 
         // 1. Handlers initialisieren
         CoreonHandler coreonHandler = new CoreonHandler(this);
@@ -60,7 +67,25 @@ public final class Coreon extends JavaPlugin {
         return commandDescriptions;
     }
 
-    public File getHomesConfig() {
-        return new File(getDataFolder(), "homes.yml");
+    /** Laden (und bei Bedarf anlegen) der homes.yml aus dem Plugin-Ordner. */
+    private void loadHomesConfig() {
+        File homesFile = new File(getDataFolder(), "homes.yml");
+        if (!homesFile.exists()) {
+            getDataFolder().mkdirs();
+            InputStream defaultStream = getResource("premade-module-configs/homes.yml");
+            if (defaultStream != null) {
+                try {
+                    Files.copy(defaultStream, homesFile.toPath());
+                } catch (IOException e) {
+                    getLogger().warning("Could not copy default homes.yml: " + e.getMessage());
+                }
+            }
+        }
+        homesConfig = YamlConfiguration.loadConfiguration(homesFile);
+    }
+
+    /** Gibt die geladene homes.yml als FileConfiguration zurueck. */
+    public FileConfiguration getHomesConfig() {
+        return homesConfig;
     }
 }
