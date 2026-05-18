@@ -42,6 +42,7 @@ public final class Coreon extends JavaPlugin {
 
         // 4. Listener registrieren
         getServer().getPluginManager().registerEvents(new QuitListener(), this);
+        getServer().getPluginManager().registerEvents(new JoinListener(), this);
         getServer().getPluginManager().registerEvents(new CoreonListener(coreonHandler), this);
         getServer().getPluginManager().registerEvents(new InvseeListener(this), this);
         getServer().getPluginManager().registerEvents(new PvPTimerListener(pvpTimerHandler), this);
