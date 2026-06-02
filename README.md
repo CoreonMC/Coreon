@@ -8,7 +8,7 @@ dass Zustände, Business‑Logik und Modulverwaltung sauber getrennt und live ak
 
 ## Muss-Ziele:
 - [x] Module über Ingame GUI einstellbar (Flixlix)
-- [ ] Invsee - Inventar eines Spielers anschauen und in echtzeit Items rausnehmen können(Nilsch)
+- [x] Invsee - Inventar eines Spielers anschauen und in echtzeit Items rausnehmen können(Nilsch)
 - [ ] Homes - Home setzen /sethome <name>, teleportieren zum Home /home <name>, löschen von Home /deletehome <name>(Flixlix)
 - [x] Vanish - Unsichtbar für jeden und so als wäre man offline /vanish (Nilsch + Flixlix)
 - [x] leicht bedienbar - DAU-Friendly(Flixlix + Nilsch)

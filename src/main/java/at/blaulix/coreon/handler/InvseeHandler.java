@@ -14,22 +14,75 @@ import java.io.File;
 import java.util.List;
 
 /**
- * Open and populate an InvSee GUI for viewing another player's inventory.
+ * Handles the opening and population of InvSee inventory GUIs.
+ * <p>
+ * This handler creates a 54-slot inventory interface for viewing and editing
+ * another player's inventory, supporting both online and offline players.
+ * <p>
+ * <b>Title Format:</b>
+ * <ul>
+ *   <li>Online player: "{@code §8InvSee §7<name>}"</li>
+ *   <li>Offline player: "{@code §8InvSee §7<name>§r§0|<uuid>}"</li>
+ * </ul>
+ * <p>
+ * The hidden {@code §r§0|<uuid>} suffix in offline player titles allows the
+ * {@link InvseeListener} to identify which player's YAML file to persist changes to,
+ * enabling inventory modifications to be saved without the target player being online.
+ * <p>
+ * <b>GUI Layout (54 slots):</b>
+ * <ul>
+ *   <li>Slots 0-35: Main inventory storage</li>
+ *   <li>Slots 36-44: Separator row (non-interactive gray glass panes)</li>
+ *   <li>Slots 45-48: Armor (helmet, chestplate, leggings, boots)</li>
+ *   <li>Slot 49: Offhand item</li>
+ * </ul>
  *
- * Title format:
- *   Online  player → "§8InvSee §7<name>"
- *   Offline player → "§8InvSee §7<name>§r§0|<uuid>"
- *
- * The hidden §r§0|<uuid> suffix lets InvseeListener identify the offline
- * player's YAML file so it can persist changes without the target being online.
+ * @author Coreon Team
+ * @see InvseeListener
  */
 public class InvseeHandler {
 
+    /**
+     * The colored prefix used in InvSee inventory titles for all players.
+     * Value: {@code "§8InvSee §7"}
+     */
     public static final String TITLE_PREFIX = "§8InvSee §7";
+
+    /**
+     * The separator string used to append a UUID to InvSee titles for offline players.
+     * Value: {@code "§r§0|"} (hidden formatting codes)
+     */
     public static final String UUID_SEPARATOR = "§r§0|";
 
     /**
-     * Open a 54-slot GUI for {@code viewer} showing {@code target}'s inventory.
+     * Opens a 54-slot InvSee GUI for the viewer to inspect and modify the target
+     * player's inventory.
+     * <p>
+     * <b>For online players:</b>
+     * Creates a GUI populated with the target's current inventory state (main storage,
+     * armor, and offhand). Changes made in the GUI are synced back to the player's
+     * inventory in real-time.
+     * <p>
+     * <b>For offline players:</b>
+     * Attempts to load the target's saved inventory data from their YAML file
+     * ({@code plugins/Coreon/playerdata/<uuid>.yml}). The UUID is embedded in the
+     * inventory title to allow the listener to persist GUI changes. If no saved data
+     * exists, displays an error message and opens an empty GUI.
+     * <p>
+     * <b>GUI Layout:</b>
+     * <ul>
+     *   <li>Slots 0-35: Main inventory items</li>
+     *   <li>Slots 36-44: Gray separator panes (read-only)</li>
+     *   <li>Slot 45: Helmet</li>
+     *   <li>Slot 46: Chestplate</li>
+     *   <li>Slot 47: Leggings</li>
+     *   <li>Slot 48: Boots</li>
+     *   <li>Slot 49: Offhand item</li>
+     * </ul>
+     *
+     * @param viewer the player who will view the GUI
+     * @param target the player whose inventory will be displayed
+     * @see InvseeListener
      */
     public void invsee(Player viewer, OfflinePlayer target) {
         boolean online = target.isOnline() && target.getPlayer() != null;
@@ -106,7 +159,15 @@ public class InvseeHandler {
         viewer.openInventory(gui);
     }
 
-    /** Create a gray glass separator item (non-interactive). */
+    /**
+     * Creates a visual separator item used to divide sections in the InvSee GUI.
+     * <p>
+     * The separator is a gray stained glass pane with a blank display name,
+     * making it non-interactive while providing a clear visual break between
+     * the main inventory section and armor/offhand section.
+     *
+     * @return a new gray glass separator ItemStack
+     */
     private ItemStack createSeparator() {
         ItemStack item = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
         ItemMeta meta = item.getItemMeta();

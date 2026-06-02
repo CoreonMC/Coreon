@@ -13,16 +13,34 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 /**
- * Syncs InvSee GUI changes back to the real player's inventory.
+ * Handles inventory synchronization for the InvSee feature.
+ * <p>
+ * This listener captures click and drag events from InvSee GUI inventories and
+ * synchronizes any changes back to the target player's actual inventory.
+ * <p>
+ * <b>Behavior depends on player online status:</b>
+ * <ul>
+ *   <li><b>Online target:</b> Changes are synced directly to the player's live inventory</li>
+ *   <li><b>Offline target:</b> Changes are persisted to the player's YAML file and will
+ *       take effect when the player joins the server</li>
+ * </ul>
+ * <p>
+ * The listener automatically blocks interaction with the separator row (slots 36-44)
+ * and prevents drags that would cross into the separator.
  *
- * Online  target → live inventory sync (as before)
- * Offline target → changes are written to the player's YAML file so they
- *                  take effect the next time the player joins the server.
+ * @author Coreon Team
+ * @see InvseeHandler
+ * @see Playerdata
  */
 public class InvseeListener implements Listener {
 
     private final Coreon plugin;
 
+    /**
+     * Constructs an InvseeListener with the Coreon plugin instance.
+     *
+     * @param plugin the Coreon plugin instance used for task scheduling
+     */
     public InvseeListener(Coreon plugin) {
         this.plugin = plugin;
     }
@@ -31,6 +49,14 @@ public class InvseeListener implements Listener {
     // Click
     // -------------------------------------------------------------------------
 
+    /**
+     * Handles inventory click events in InvSee GUIs.
+     * <p>
+     * Blocks clicks on the separator row (slots 36-44) and routes inventory changes
+     * to the change handler synchronously. Only processes clicks in the top inventory.
+     *
+     * @param event the inventory click event
+     */
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         String title = event.getView().getTitle();
@@ -54,6 +80,15 @@ public class InvseeListener implements Listener {
     // Drag
     // -------------------------------------------------------------------------
 
+    /**
+     * Handles inventory drag events in InvSee GUIs.
+     * <p>
+     * Cancels the entire drag operation if any affected slot intersects with the
+     * separator row (slots 36-44). Otherwise, routes the inventory change to the
+     * change handler.
+     *
+     * @param event the inventory drag event
+     */
     @EventHandler
     public void onInventoryDrag(InventoryDragEvent event) {
         String title = event.getView().getTitle();
@@ -77,10 +112,19 @@ public class InvseeListener implements Listener {
     // -------------------------------------------------------------------------
 
     /**
-     * Decides whether the target is online or offline and routes accordingly.
+     * Processes inventory changes and routes them to the appropriate sync method.
+     * <p>
+     * Detects whether the target player is online or offline by checking for a UUID
+     * separator in the inventory title. If the separator is found, the UUID is extracted
+     * and used to determine the player's current status. If the player was offline but
+     * has since come online, the change is synced directly. Otherwise, the change is
+     * persisted to the YAML file.
+     * <p>
+     * For online players, the change is synced directly to the player's inventory.
      *
-     * @param gui   The InvSee inventory (54 slots)
-     * @param title The inventory title (may contain embedded UUID for offline)
+     * @param gui   the InvSee inventory containing the modified items (54 slots)
+     * @param title the inventory title, which may contain an embedded UUID for offline players
+     *              in the format: "§8InvSee §7&lt;name&gt;§r§0|&lt;uuid&gt;"
      */
     private void handleChange(Inventory gui, String title) {
         if (title.contains(InvseeHandler.UUID_SEPARATOR)) {
@@ -112,7 +156,24 @@ public class InvseeListener implements Listener {
     // Helpers
     // -------------------------------------------------------------------------
 
-    /** Push GUI contents directly into an online player's inventory. */
+    /**
+     * Synchronizes the InvSee GUI inventory contents directly to an online player's
+     * actual inventory.
+     * <p>
+     * Copies inventory items from the following GUI slots:
+     * <ul>
+     *   <li>Slots 0-35: Main inventory storage</li>
+     *   <li>Slot 45: Helmet</li>
+     *   <li>Slot 46: Chestplate</li>
+     *   <li>Slot 47: Leggings</li>
+     *   <li>Slot 48: Boots</li>
+     *   <li>Slot 49: Offhand item</li>
+     * </ul>
+     * After the sync, the player's inventory is updated to reflect all changes.
+     *
+     * @param gui    the InvSee GUI inventory containing the items to sync
+     * @param target the online player whose inventory will be updated
+     */
     private void syncToOnlinePlayer(Inventory gui, Player target) {
         // Main storage (0-35)
         for (int i = 0; i < 36; i++) {
@@ -128,13 +189,25 @@ public class InvseeListener implements Listener {
     }
 
     /**
-     * Persist GUI contents to the offline player's YAML file.
-     * The changes will be loaded automatically when the player next joins
-     * because the server reads from the same file on join (or Coreon's
-     * QuitListener overwrites it only on the NEXT quit after joining).
+     * Persists InvSee GUI changes to an offline player's YAML file.
+     * <p>
+     * Extracts the inventory contents from the GUI and writes them to the player's
+     * YAML file, preserving:
+     * <ul>
+     *   <li>Main inventory storage (36 items)</li>
+     *   <li>Armor pieces (4 items: helmet, chestplate, leggings, boots)</li>
+     *   <li>Offhand item</li>
+     * </ul>
+     * <p>
+     * The persisted data will be loaded and applied when the player logs in to the
+     * server next time, effectively updating their offline inventory permanently.
+     * <p>
+     * <b>Note:</b> To ensure offline edits survive a player's next login, they will
+     * also be reapplied at the JOIN event - see README for additional details.
      *
-     * To guarantee the offline edits survive the player's next login we also
-     * need to apply them once PlayerJoinEvent fires – see note in README.
+     * @param gui  the InvSee GUI inventory containing items to save
+     * @param uuid the string representation of the offline player's UUID
+     * @see Playerdata#saveOfflineInventory(String, ItemStack[], ItemStack[], ItemStack)
      */
     private void saveToYaml(Inventory gui, String uuid) {
         // Reconstruct arrays from GUI slots
