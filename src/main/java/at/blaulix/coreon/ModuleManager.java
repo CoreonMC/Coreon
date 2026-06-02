@@ -1,6 +1,7 @@
 package at.blaulix.coreon;
 
 import at.blaulix.coreon.command.*;
+import at.blaulix.coreon.command.homes.TpHomeCommand;
 import at.blaulix.coreon.database.HomeDatabase;
 import at.blaulix.coreon.handler.*;
 import org.bukkit.command.Command;
@@ -51,7 +52,7 @@ public class ModuleManager {
         realExecutors.put("invsee",    new InvseeCommand());
         realExecutors.put("vanish",    new VanishCommand(vanishHandler));
         realExecutors.put("pvptimer",  new PvPTimerCommand(pvpTimerHandler));
-        realExecutors.put("homes",      new HomesCommand(plugin, homeDatabase));
+        realExecutors.put("homes",      new TpHomeCommand(plugin, homeDatabase));
     }
 
     /**
