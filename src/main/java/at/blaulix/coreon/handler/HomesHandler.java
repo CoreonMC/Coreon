@@ -52,6 +52,17 @@ public class HomesHandler {
         });
     }
 
+    public void deleteHome(Player player, String homeName){
+        Bukkit.getScheduler().runTask(javaPlugin, () -> {
+            homeDatabase.deleteHome(player.getUniqueId(), homeName);
+             String raw = plugin.getHomesConfig().getString("messages.home-deleted",
+                    "&aHome &b%home%&a has been deleted!");
+            String editedMessage = ChatColor.translateAlternateColorCodes('&',
+                    raw.replace("%home%", homeName));
+            player.sendMessage(editedMessage);
+        });
+    }
+
     // Return number of homes for player
     public int getHomeCount(Player player) {
         return homeDatabase.getHomeCount(player.getUniqueId());
@@ -95,5 +106,16 @@ public class HomesHandler {
             Bukkit.getScheduler().runTask(javaPlugin, () ->
                     player.sendMessage(msg));
         });
+    }
+
+    public void helpHomes(Player player){
+        String raw = plugin.getHomesConfig().getString("messages.home-help",
+                "&aHome Command Help:\n" +
+                "&b/home set <name> &7- Set a home at your current location\n" +
+                "&b/home delete <name> &7- Delete a home\n" +
+                "&b/home list &7- List your homes\n" +
+                "&b/home <name> &7- Teleport to a home");
+        String msg = ChatColor.translateAlternateColorCodes('&', raw);
+        player.sendMessage(msg);
     }
 }

@@ -78,6 +78,17 @@ public class HomeDatabase {
         }
     }
 
+    public void deleteHome(UUID uuid, String name){
+        String sql = "DELETE FROM player_homes WHERE uuid = ? AND name = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, uuid.toString());
+            pstmt.setString(2, name.toLowerCase());
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     // Load a home by name
     public Location getHome(UUID uuid, String name) {
         String sql = "SELECT * FROM player_homes WHERE uuid = ? AND name = ?";
