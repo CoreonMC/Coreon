@@ -52,6 +52,7 @@ public class ModuleManager {
         realExecutors.put("vanish",    new VanishCommand(vanishHandler));
         realExecutors.put("pvptimer",  new PvPTimerCommand(pvpTimerHandler));
         realExecutors.put("homes",      new HomesCommand(plugin, homeDatabase));
+        realExecutors.put("ec",        new EnderChestCommand());
     }
 
     /**

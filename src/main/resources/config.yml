@@ -4,6 +4,7 @@ modules:
   vanish: true
   pvptimer: true
   homes: true
+  ec: true
 
 
 config:

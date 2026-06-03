@@ -23,3 +23,7 @@ commands:
     description: Sets a global PvP disable timer.
     usage: /pvptimer <minutes>
     permission: coreon.pvptimer
+  ec:
+    description: Öffnet deine eigene Enderchest
+    usage: /ec
+    permission: coreon.ec
