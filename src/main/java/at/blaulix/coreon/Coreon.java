@@ -57,7 +57,7 @@ public final class Coreon extends JavaPlugin {
         // Listener
         getServer().getPluginManager().registerEvents(new QuitListener(), this);
 
-        getServer().getPluginManager().registerEvents(new JoinListener(), this);
+        getServer().getPluginManager().registerEvents(new JoinListener(instance), this);
 
         getServer().getPluginManager().registerEvents(new CoreonListener(coreonHandler), this);
 
