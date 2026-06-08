@@ -3,11 +3,14 @@ package at.blaulix.coreon.handler;
 import at.blaulix.coreon.Coreon;
 import at.blaulix.coreon.util.ConfigGetter;
 import at.blaulix.coreon.database.HomeDatabase;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.List;
 import java.util.UUID;
@@ -40,7 +43,7 @@ public class HomesHandler {
 
             String msg = ChatColor.translateAlternateColorCodes('&', raw.replace("%limit%", String.valueOf(homeLimit)));
 
-            player.sendMessage(msg);
+            player.sendActionBar(Component.text(msg, NamedTextColor.RED));
             return;
         }
 
@@ -79,7 +82,7 @@ public class HomesHandler {
 
             String message = ChatColor.translateAlternateColorCodes('&', raw.replace("%home%", homeName));
 
-            Bukkit.getScheduler().runTask(javaPlugin, () -> player.sendMessage(message));
+            Bukkit.getScheduler().runTask(javaPlugin, () -> player.sendActionBar(Component.text(message, NamedTextColor.AQUA)));
         });
     }
 
@@ -101,33 +104,83 @@ public class HomesHandler {
             Location location = homeDatabase.getHome(player.getUniqueId(), homeName);
 
             String tpRaw = ConfigGetter.getMessage("messages.home-teleported");
-
             if (tpRaw == null) {
-                tpRaw = "&aTeleported " + "to &b%home%&a!";
+                tpRaw = "&aTeleported to &b%home%&a!";
             }
 
-            String tpMessage = ChatColor.translateAlternateColorCodes('&', tpRaw.replace("%home%", homeName));
+            String tpMessage = ChatColor.translateAlternateColorCodes('&',
+                    tpRaw.replace("%home%", homeName));
 
             String notExistRaw = ConfigGetter.getMessage("messages.home-not-exist");
-
             if (notExistRaw == null) {
-                notExistRaw = "&cNo home " + "named &b%home%" + "&c found!";
+                notExistRaw = "&cNo home named &b%home%&c found!";
             }
 
-            String notExistMessage = ChatColor.translateAlternateColorCodes('&', notExistRaw.replace("%home%", homeName));
+            String notExistMessage = ChatColor.translateAlternateColorCodes('&',
+                    notExistRaw.replace("%home%", homeName));
 
             Bukkit.getScheduler().runTask(javaPlugin, () -> {
 
-                if (location != null) {
-
-                    player.teleport(location);
-
-                    player.sendMessage(tpMessage);
-
-                } else {
-
+                if (location == null) {
                     player.sendMessage(notExistMessage);
+                    return;
                 }
+
+                int delay = ConfigGetter.getInt("config.homes.teleport.delay-seconds");
+
+                // Bypass delay -> sofort teleportieren
+                if (player.hasPermission("coreon.homes.teleport.bypass-delay")) {
+                    player.teleport(location);
+                    player.sendActionBar(Component.text(tpMessage, NamedTextColor.GREEN));
+                    return;
+                }
+
+                Location startLocation = player.getLocation().clone();
+
+                new BukkitRunnable() {
+
+                    int timeLeft = delay;
+
+                    @Override
+                    public void run() {
+
+                        // Spieler offline?
+                        if (!player.isOnline()) {
+                            cancel();
+                            return;
+                        }
+
+                        // Bewegung prüfen
+                        if (!player.hasPermission("coreon.homes.teleport.bypass-move")) {
+
+                            Location current = player.getLocation();
+
+                            boolean moved =
+                                    current.getBlockX() != startLocation.getBlockX()
+                                            || current.getBlockY() != startLocation.getBlockY()
+                                            || current.getBlockZ() != startLocation.getBlockZ();
+
+                            if (moved) {
+                                player.sendActionBar(Component.text("Teleport cancelled because you moved.", NamedTextColor.DARK_RED));
+                                cancel();
+                                return;
+                            }
+                        }
+
+                        // Countdown
+                        if (timeLeft > 0) {
+                            player.sendActionBar(Component.text("Teleporting in " + timeLeft + " seconds...", NamedTextColor.YELLOW));
+                            timeLeft--;
+                            return;
+                        }
+
+                        // Teleport
+                        player.teleport(location);
+                        player.sendMessage(tpMessage);
+                        cancel();
+                    }
+
+                }.runTaskTimer(javaPlugin, 0L, 20L);
             });
         });
     }
