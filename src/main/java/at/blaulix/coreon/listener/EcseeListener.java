@@ -1,0 +1,114 @@
+package at.blaulix.coreon.listener;
+
+import at.blaulix.coreon.Coreon;
+import at.blaulix.coreon.handler.EcseeHandler;
+import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+
+/**
+ * Handles inventory synchronization for the EcSee feature.
+ * <p>
+ * Captures click and drag events from EcSee GUI inventories and
+ * synchronizes changes back to the target player's actual ender chest.
+ * <p>
+ * Online target: Changes are synced directly to the player's live ender chest.
+ * Offline target: Changes are persisted to the player's YAML file.
+ *
+ * @author Coreon Team
+ * @see EcseeHandler
+ */
+public class EcseeListener implements Listener {
+
+    private final Coreon plugin;
+
+    public EcseeListener(Coreon plugin) {
+        this.plugin = plugin;
+    }
+
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent event) {
+        String title = event.getView().getTitle();
+        if (!title.startsWith(EcseeHandler.TITLE_PREFIX)) return;
+
+        // Only handle clicks inside the top (EcSee) inventory
+        if (event.getRawSlot() >= event.getView().getTopInventory().getSize()) return;
+
+        plugin.getServer().getScheduler().runTask(plugin, () ->
+                handleChange(event.getInventory(), title)
+        );
+    }
+
+    @EventHandler
+    public void onInventoryDrag(InventoryDragEvent event) {
+        String title = event.getView().getTitle();
+        if (!title.startsWith(EcseeHandler.TITLE_PREFIX)) return;
+
+        plugin.getServer().getScheduler().runTask(plugin, () ->
+                handleChange(event.getInventory(), title)
+        );
+    }
+
+    private void handleChange(Inventory gui, String title) {
+        if (title.contains(EcseeHandler.UUID_SEPARATOR)) {
+            // Offline player
+            String uuid = title.substring(title.indexOf(EcseeHandler.UUID_SEPARATOR)
+                    + EcseeHandler.UUID_SEPARATOR.length());
+
+            Player nowOnline = Bukkit.getPlayer(java.util.UUID.fromString(uuid));
+            if (nowOnline != null && nowOnline.isOnline()) {
+                syncToOnlinePlayer(gui, nowOnline);
+            } else {
+                saveToYaml(gui, uuid);
+            }
+        } else {
+            // Online player
+            String targetName = title.substring(EcseeHandler.TITLE_PREFIX.length());
+            Player target = plugin.getServer().getPlayer(targetName);
+            if (target != null && target.isOnline()) {
+                syncToOnlinePlayer(gui, target);
+            }
+        }
+    }
+
+    private void syncToOnlinePlayer(Inventory gui, Player target) {
+        ItemStack[] contents = new ItemStack[27];
+        for (int i = 0; i < 27; i++) {
+            contents[i] = gui.getItem(i);
+        }
+        target.getEnderChest().setContents(contents);
+        target.updateInventory();
+    }
+
+    private void saveToYaml(Inventory gui, String uuid) {
+        File folder = new File("plugins/Coreon/playerdata");
+        if (!folder.exists()) folder.mkdirs();
+
+        File file = new File(folder, uuid + ".yml");
+        FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+
+        ItemStack[] contents = new ItemStack[27];
+        for (int i = 0; i < 27; i++) {
+            contents[i] = gui.getItem(i);
+        }
+
+        config.set("enderchest.content", Arrays.asList(contents));
+
+        try {
+            config.save(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}

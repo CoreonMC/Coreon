@@ -60,6 +60,7 @@ public class ModuleManager {
         realExecutors.put("sethome",    new SetHomeCommand(plugin, homeDatabase));
         realExecutors.put("deletehome", new DeleteHomeCommand(plugin, homeDatabase));
         realExecutors.put("ec", new EnderChestCommand());
+        realExecutors.put("ecsee", new EcseeCommand());
     }
 
     /**

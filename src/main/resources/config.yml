@@ -5,6 +5,7 @@ modules:
   pvptimer: true
   homes: true
   ec: true
+  ecsee: true
 
 
 config:

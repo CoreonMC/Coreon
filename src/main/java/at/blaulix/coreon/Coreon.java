@@ -47,6 +47,7 @@ public final class Coreon extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new InvseeListener(this), this);
         getServer().getPluginManager().registerEvents(new PvPTimerListener(pvpTimerHandler), this);
         getServer().getPluginManager().registerEvents(new VanishListener(this, vanishHandler), this);
+        getServer().getPluginManager().registerEvents(new EcseeListener(this), this);
 
         // 5. Coreon-Command registrieren (immer aktiv, kein Modul)
         Objects.requireNonNull(getCommand("coreon")).setExecutor(new CoreonCommand(coreonHandler));
