@@ -29,7 +29,7 @@ public class SetHomeCommand implements CommandExecutor {
 
         Player player = (Player) sender;
 
-        if (!player.hasPermission("coreon.command.sethome")) {
+        if (!player.hasPermission("coreon.homes.set")) {
             player.sendMessage(ChatColor.RED + "You don't have permission to use this command!");
             return true;
         }

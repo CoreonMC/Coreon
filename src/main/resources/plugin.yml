@@ -17,8 +17,20 @@ commands:
     permission: coreon.vanish
   home:
     description: Gives you homes.
-    usage: /home
-    permission: coreon.home
+    usage: /home <Name>
+    permission: coreon.homes.teleport
+  homes:
+    description: Lists your homes.
+    usage: /homes <Playername>
+    permission: coreon.homes.list
+  sethome:
+    description: Setzt ein Home an deiner aktuellen Position
+    usage: /sethome <Name>
+    permission: coreon.homes.set
+  deletehome:
+    description: Löscht ein Home
+    usage: /delhome <Name>
+    permission: coreon.homes.delete
   pvptimer:
     description: Sets a global PvP disable timer.
     usage: /pvptimer <minutes>

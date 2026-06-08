@@ -26,7 +26,7 @@ public class TpHomeCommand implements CommandExecutor {
             return false;
         }
         HomesHandler homesHandler = new HomesHandler((Coreon) javaPlugin, homeDatabase);
-        if (!sender.hasPermission("coreon.homes.tp")) {
+        if (!sender.hasPermission("coreon.homes.teleport")) {
             sender.sendMessage("§cYou don't have permission to teleport to your homes.");
             return false;
         }

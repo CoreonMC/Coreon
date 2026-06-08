@@ -29,7 +29,7 @@ public class DeleteHomeCommand implements CommandExecutor {
 
         Player player = (Player) sender;
 
-        if (!player.hasPermission("coreon.command.deletehome")) {
+        if (!player.hasPermission("coreon.homes.delete")) {
             player.sendMessage(ChatColor.RED + "You don't have permission to use this command!");
             return true;
         }
