@@ -5,15 +5,15 @@ max-homes:
 teleport:
   delay-seconds: 3       # Seconds to wait before teleporting (0 for instant)
   cancel-on-move: true   # Cancel teleport if the player moves
-  cooldown-seconds: 10   # Cooldown between teleports (0 to disable)
-
 # Kosten (benötigt Vault + Economy Plugin)
+
+# Costs (requires Vault + Economy Plugin)
 costs:
   sethome: 0
   home: 0
   delhome: 0
 
-# Nachrichten
+# Messages
 messages:
   prefix: "&8[&bHomes&8] "
 

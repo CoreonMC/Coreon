@@ -5,14 +5,14 @@ api-version: '1.21'
 
 commands:
   coreon:
-    description: Coreon Hauptbefehl
+    description: Coreon main command
     usage: /coreon
   invsee:
-    description: Öffnet das Inventar eines Spielers
-    usage: /invsee <Spieler>
+    description: Opens a player's inventory
+    usage: /invsee <Player>
     permission: coreon.invsee
   vanish:
-    description: Verschwinde vor anderen Spielern
+    description: Become invisible to other players
     usage: /vanish
     permission: coreon.vanish
   home:
@@ -24,11 +24,11 @@ commands:
     usage: /homes <Playername>
     permission: coreon.homes.list
   sethome:
-    description: Setzt ein Home an deiner aktuellen Position
+    description: Sets a home at your current position
     usage: /sethome <Name>
     permission: coreon.homes.set
   deletehome:
-    description: Löscht ein Home
+    description: Deletes a home
     usage: /delhome <Name>
     permission: coreon.homes.delete
   pvptimer:
@@ -36,6 +36,10 @@ commands:
     usage: /pvptimer <minutes>
     permission: coreon.pvptimer
   ec:
-    description: Öffnet deine eigene Enderchest
+    description: Opens your own enderchest
     usage: /ec
     permission: coreon.ec
+  ecsee:
+    description: Opens a player's enderchest
+    usage: /ecsee <Player>
+    permission: coreon.ecsee
