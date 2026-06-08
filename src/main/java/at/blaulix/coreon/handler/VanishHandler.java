@@ -27,7 +27,7 @@ public class VanishHandler {
             player.setCollidable(false);
             player.setInvulnerable(true);
             player.setSilent(true);
-            player.sendActionBar(Component.text("Willkommen auf dem Server!", NamedTextColor.GOLD));
+            player.sendActionBar(Component.text("You are now in Vanish", NamedTextColor.GOLD));
 
             // Für alle anderen Spieler auf dem Server verstecken
             for (Player target : Bukkit.getOnlinePlayers()) {
