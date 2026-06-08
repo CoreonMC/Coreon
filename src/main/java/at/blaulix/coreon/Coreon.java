@@ -15,6 +15,7 @@ import java.util.Objects;
 
 public final class Coreon extends JavaPlugin {
 
+    private final File commandDescriptions = new File(getDataFolder(), "command_descriptions.yml");
     private ModuleManager moduleManager;
     private FileConfiguration homesConfig;
 
@@ -116,5 +117,9 @@ public final class Coreon extends JavaPlugin {
         if (homesConfig == null) return null;
         org.bukkit.configuration.ConfigurationSection section = homesConfig.getConfigurationSection("config.homes");
         return section != null ? section : homesConfig;
+    }
+
+    public File getCommandDescriptions() {
+        return commandDescriptions;
     }
 }
