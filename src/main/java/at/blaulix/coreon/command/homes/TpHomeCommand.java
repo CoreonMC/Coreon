@@ -21,15 +21,21 @@ public class TpHomeCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("§cOnly players can use this command.");
+            return false;
+        }
         HomesHandler homesHandler = new HomesHandler((Coreon) javaPlugin, homeDatabase);
-        Player player = (Player) sender;
-        if(args[0].isEmpty()){
+        if (!sender.hasPermission("coreon.homes.tp")) {
+            sender.sendMessage("§cYou don't have permission to teleport to your homes.");
+            return false;
+        }
+        if (args[0].isEmpty()) {
             homesHandler.helpHomes(player);
             return false;
         }
 
         homesHandler.teleportToHome(player, args[0]);
-
         return true;
     }
 }

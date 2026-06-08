@@ -39,7 +39,6 @@ public class SetHomeCommand implements CommandExecutor {
         }
 
         homesHandler.setHome(player, args[0]);
-
         return true;
     }
 }
