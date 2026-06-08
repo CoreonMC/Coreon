@@ -10,42 +10,66 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStreamReader;
 import java.util.Objects;
 
 public final class Coreon extends JavaPlugin {
 
+    private static Coreon instance;
+
     private final File commandDescriptions = new File(getDataFolder(), "command_descriptions.yml");
+
     private ModuleManager moduleManager;
-    private FileConfiguration homesConfig;
+    private FileConfiguration messagesConfig;
 
     @Override
     public void onEnable() {
+        instance = this;
+
         saveDefaultConfig();
 
-        // 1. Handlers initialisieren
+        // messages.yml erstellen/laden
+        saveResource("messages.yml", false);
+
+        File messagesFile = new File(getDataFolder(), "messages.yml");
+
+        messagesConfig = YamlConfiguration.loadConfiguration(messagesFile);
+
+        // Handler
         CoreonHandler coreonHandler = new CoreonHandler(this);
+
         PvPTimerHandler pvpTimerHandler = new PvPTimerHandler(this);
+
         VanishHandler vanishHandler = new VanishHandler(this);
 
-        // 2. Datenbank
-        HomeDatabase homesHomeDatabase = new HomeDatabase(this, "homes.db");
-        homesHomeDatabase.enableDatabase();
+        // Datenbank
+        HomeDatabase homesDatabase = new HomeDatabase(this, "homes.db");
 
-        // 3. ModuleManager erstellen — lädt Premade-Configs und aktiviert Commands
-        moduleManager = new ModuleManager(this, pvpTimerHandler, vanishHandler, homesHomeDatabase);
+        homesDatabase.enableDatabase();
+
+        // Module laden
+        moduleManager = new ModuleManager(this, pvpTimerHandler, vanishHandler, homesDatabase);
+
         moduleManager.applyAll();
 
-        // 4. Listener registrieren
+        // Listener
         getServer().getPluginManager().registerEvents(new QuitListener(), this);
+
         getServer().getPluginManager().registerEvents(new JoinListener(), this);
+
         getServer().getPluginManager().registerEvents(new CoreonListener(coreonHandler), this);
+
         getServer().getPluginManager().registerEvents(new InvseeListener(this), this);
+
         getServer().getPluginManager().registerEvents(new PvPTimerListener(pvpTimerHandler), this);
+
         getServer().getPluginManager().registerEvents(new VanishListener(this, vanishHandler), this);
+
         getServer().getPluginManager().registerEvents(new EcseeListener(this), this);
 
-        // 5. Coreon-Command registrieren (immer aktiv, kein Modul)
+        // Command
         Objects.requireNonNull(getCommand("coreon")).setExecutor(new CoreonCommand(coreonHandler));
     }
 
@@ -54,69 +78,57 @@ public final class Coreon extends JavaPlugin {
         HomeDatabase.getAll().forEach(HomeDatabase::disconnect);
     }
 
-    /** Wird von CoreonHandler nach einem Modul-Toggle aufgerufen, um Commands live zu updaten. */
+    public static Coreon getInstance() {
+        return instance;
+    }
+
+    public FileConfiguration getMessages() {
+        return messagesConfig;
+    }
+
     public void applyModule(String key) {
         if (moduleManager != null) {
             moduleManager.apply(key);
         }
     }
 
-    /**
-     * Schreibt eine Premade-Config einmalig in den config:-Block der config.yml.
-     * Format:
-     *   config:
-     *     #-----description-----#
-     *     name:
-     *       <Inhalt der premadePath-Datei>
-     *     #-----description-----#
-     */
     public void loadPremadeConfig(String premadePath, String name, String description) {
-        File configFile = new File(getDataFolder(), "config.yml");
-        if (!configFile.exists()) {
-            getDataFolder().mkdirs();
-        }
 
-        // Prüfen ob der Key bereits existiert → nur einmal schreiben
+        File configFile = new File(getDataFolder(), "config.yml");
+
         YamlConfiguration yaml = YamlConfiguration.loadConfiguration(configFile);
+
         if (yaml.contains("config." + name)) {
-            homesConfig = yaml;
             return;
         }
 
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(configFile, true));
-             BufferedReader br = new BufferedReader(new InputStreamReader(
-                     Objects.requireNonNull(getResource("premade-module-configs/" + premadePath))))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(Objects.requireNonNull(getResource("premade-module-configs/" + premadePath))))) {
 
-            bw.newLine();
-            bw.write("  #-----" + description + "-----#");
-            bw.newLine();
-            bw.write("  " + name + ":");
-            bw.newLine();
+            StringBuilder content = new StringBuilder();
 
             String line;
+
             while ((line = br.readLine()) != null) {
-                bw.write("    " + line);
-                bw.newLine();
+
+                content.append(line).append("\n");
             }
 
-            bw.write("  #-----" + description + "-----#");
-            bw.newLine();
+            YamlConfiguration premade = new YamlConfiguration();
 
-        } catch (IOException e) {
+            premade.loadFromString(content.toString());
+
+            yaml.set("config." + name, premade.getValues(false));
+
+            yaml.save(configFile);
+
+            getLogger().info("Loaded premade config: " + name);
+
+        } catch (Exception e) {
+
             getLogger().warning("Could not write premade config '" + premadePath + "': " + e.getMessage());
         }
 
-        homesConfig = YamlConfiguration.loadConfiguration(configFile);
-    }
-
-    /**
-     * Gibt den config.homes-Block als ConfigurationSection zurück.
-     * HomesHandler kann weiterhin getString("messages.home-set") etc. aufrufen.
-     */
-    public org.bukkit.configuration.ConfigurationSection getHomesConfig() {
-        if (homesConfig == null) return null;
-        org.bukkit.configuration.ConfigurationSection section = homesConfig.getConfigurationSection("config.homes");
-        return section != null ? section : homesConfig;
+        reloadConfig();
     }
 
     public File getCommandDescriptions() {
