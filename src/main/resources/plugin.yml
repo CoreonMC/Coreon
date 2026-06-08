@@ -29,7 +29,7 @@ commands:
     permission: coreon.homes.set
   deletehome:
     description: Deletes a home
-    usage: /delhome <Name>
+    usage: /deletehome <Name>
     permission: coreon.homes.delete
   pvptimer:
     description: Sets a global PvP disable timer.

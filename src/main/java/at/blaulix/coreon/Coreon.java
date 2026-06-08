@@ -10,14 +10,10 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
+import java.io.*;
 import java.util.Objects;
 
 public final class Coreon extends JavaPlugin {
-    private final File commandDescriptions = new File(getDataFolder(), "command_descriptions.yml");
 
     private ModuleManager moduleManager;
     private FileConfiguration homesConfig;
@@ -25,7 +21,6 @@ public final class Coreon extends JavaPlugin {
     @Override
     public void onEnable() {
         saveDefaultConfig();
-        loadHomesConfig();
 
         // 1. Handlers initialisieren
         CoreonHandler coreonHandler = new CoreonHandler(this);
@@ -36,7 +31,7 @@ public final class Coreon extends JavaPlugin {
         HomeDatabase homesHomeDatabase = new HomeDatabase(this, "homes.db");
         homesHomeDatabase.enableDatabase();
 
-        // 3. ModuleManager erstellen und initial anwenden (setzt Commands auf aktiv/deaktiviert)
+        // 3. ModuleManager erstellen — lädt Premade-Configs und aktiviert Commands
         moduleManager = new ModuleManager(this, pvpTimerHandler, vanishHandler, homesHomeDatabase);
         moduleManager.applyAll();
 
@@ -65,29 +60,61 @@ public final class Coreon extends JavaPlugin {
         }
     }
 
-    public File getCommandDescriptions() {
-        return commandDescriptions;
-    }
-
-    /** Laden (und bei Bedarf anlegen) der homes.yml aus dem Plugin-Ordner. */
-    private void loadHomesConfig() {
-        File homesFile = new File(getDataFolder(), "homes.yml");
-        if (!homesFile.exists()) {
+    /**
+     * Schreibt eine Premade-Config einmalig in den config:-Block der config.yml.
+     * Format:
+     *   config:
+     *     #-----description-----#
+     *     name:
+     *       <Inhalt der premadePath-Datei>
+     *     #-----description-----#
+     */
+    public void loadPremadeConfig(String premadePath, String name, String description) {
+        File configFile = new File(getDataFolder(), "config.yml");
+        if (!configFile.exists()) {
             getDataFolder().mkdirs();
-            InputStream defaultStream = getResource("premade-module-configs/homes.yml");
-            if (defaultStream != null) {
-                try {
-                    Files.copy(defaultStream, homesFile.toPath());
-                } catch (IOException e) {
-                    getLogger().warning("Could not copy default homes.yml: " + e.getMessage());
-                }
-            }
         }
-        homesConfig = YamlConfiguration.loadConfiguration(homesFile);
+
+        // Prüfen ob der Key bereits existiert → nur einmal schreiben
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(configFile);
+        if (yaml.contains("config." + name)) {
+            homesConfig = yaml;
+            return;
+        }
+
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(configFile, true));
+             BufferedReader br = new BufferedReader(new InputStreamReader(
+                     Objects.requireNonNull(getResource("premade-module-configs/" + premadePath))))) {
+
+            bw.newLine();
+            bw.write("  #-----" + description + "-----#");
+            bw.newLine();
+            bw.write("  " + name + ":");
+            bw.newLine();
+
+            String line;
+            while ((line = br.readLine()) != null) {
+                bw.write("    " + line);
+                bw.newLine();
+            }
+
+            bw.write("  #-----" + description + "-----#");
+            bw.newLine();
+
+        } catch (IOException e) {
+            getLogger().warning("Could not write premade config '" + premadePath + "': " + e.getMessage());
+        }
+
+        homesConfig = YamlConfiguration.loadConfiguration(configFile);
     }
 
-    /** Gibt die geladene homes.yml als FileConfiguration zurueck. */
-    public FileConfiguration getHomesConfig() {
-        return homesConfig;
+    /**
+     * Gibt den config.homes-Block als ConfigurationSection zurück.
+     * HomesHandler kann weiterhin getString("messages.home-set") etc. aufrufen.
+     */
+    public org.bukkit.configuration.ConfigurationSection getHomesConfig() {
+        if (homesConfig == null) return null;
+        org.bukkit.configuration.ConfigurationSection section = homesConfig.getConfigurationSection("config.homes");
+        return section != null ? section : homesConfig;
     }
 }

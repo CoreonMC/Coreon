@@ -30,7 +30,7 @@ public class HomesHandler {
      * Checks limit and informs player.
      */
     public void setHome(Player player, String homeName) {
-        int homeLimit = plugin.getConfig().getInt("max-homes.default");
+        int homeLimit = plugin.getConfig().getInt("max-homes");
         if (getHomeCount(player) >= homeLimit) {
             String raw = plugin.getHomesConfig().getString("messages.max-homes",
                     "&cYou have reached the maximum number of homes (%limit%)!");

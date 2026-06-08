@@ -1,5 +1,5 @@
-max-homes:
-  default: 3   # Default maximum homes per player
+# Max homes per player
+max-homes: 3
 
 # Teleport Einstellungen
 teleport:

@@ -1,11 +1,11 @@
 # Enable or disable features that you dont need or want to use. This can help with performance and security.
 modules:
-  invsee: true
-  vanish: true
-  pvptimer: true
-  homes: true
-  ec: true
-  ecsee: true
+  invsee: false
+  vanish: false
+  pvptimer: false
+  homes: false
+  ec: flase
+  ecsee: false
 
 
 config:
