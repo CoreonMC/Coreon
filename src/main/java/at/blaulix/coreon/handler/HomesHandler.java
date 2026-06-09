@@ -169,7 +169,7 @@ public class HomesHandler {
 
                         // Countdown
                         if (timeLeft > 0) {
-                            player.sendActionBar(Component.text("Teleporting in " + timeLeft + " seconds...", NamedTextColor.YELLOW));
+                            player.sendActionBar(Component.text("Teleporting in " + timeLeft + " seconds...", NamedTextColor.GRAY));
                             timeLeft--;
                             return;
                         }

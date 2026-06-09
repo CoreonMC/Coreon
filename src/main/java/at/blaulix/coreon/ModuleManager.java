@@ -16,13 +16,14 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class ModuleManager {
 
     private final Coreon plugin;
 
     // Stores the real executors per command name
-    private final Map<String, CommandExecutor> realExecutors = new HashMap<>();
+    private final Map<String, CommandExecutor> realExecutors = new TreeMap<>();
 
     /**
      * Defines per module:

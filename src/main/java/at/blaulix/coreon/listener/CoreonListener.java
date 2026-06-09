@@ -9,6 +9,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 public class CoreonListener implements Listener {
 
     // Handles GUI logic and module actions
@@ -47,12 +50,31 @@ public class CoreonListener implements Listener {
                 player.closeInventory();
                 return;
             }
+            if(itemName.equals("search")){
+                handler.searchAnvil(player, "Search Modules");
+                return;
+            }
             // Check if module exists in config
             if (!modulesSection.contains(itemName)) return;
 
             // Open module submenu
             handler.partSettings(itemName, player);
             return;
+        }
+
+        if (title.equals("search modules")) {
+            event.setCancelled(true); // Prevent item movement
+            if (!modulesSection.contains(itemName)) return;
+
+            Map<String, Object> modules = new TreeMap<>();
+            for (String key : modulesSection.getKeys(false)) {
+                String displayName = handler.getPlugin().getConfig().getString("modules." + key + ".display-name");
+                if (displayName != null && itemName.contains(displayName.toLowerCase())) {
+                    modules.put(key, displayName);
+                }
+            }
+
+            handler.partSettings(itemName, player);
         }
 
         // Module submenu

@@ -2,13 +2,17 @@ package at.blaulix.coreon.handler;
 
 import at.blaulix.coreon.Coreon;
 import at.blaulix.coreon.util.Formats;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.view.AnvilView;
 
 import java.util.Collections;
 
@@ -32,7 +36,9 @@ public class CoreonHandler {
     // Temporary inventory used while constructing GUIs
     private Inventory inv;
 
-    /** Open the main settings GUI showing all modules. */
+    /**
+     * Open the main settings GUI showing all modules.
+     */
     public void coreonSettings(Player player) {
 
         ConfigurationSection modulesSection = plugin.getConfig().getConfigurationSection("modules");
@@ -47,18 +53,33 @@ public class CoreonHandler {
         // Exit button (barrier)
         ItemStack exit = new ItemStack(Material.BARRIER);
         ItemMeta exitMeta = exit.getItemMeta();
+        ItemStack search = new ItemStack(Material.COMPASS);
+        ItemMeta searchMeta = search.getItemMeta();
+        ItemStack page = new ItemStack(Material.PAPER);
+        ItemMeta pageMeta = page.getItemMeta();
+        ItemStack next = new ItemStack(Material.ARROW);
+        ItemMeta nextMeta = next.getItemMeta();
+        ItemStack previous = new ItemStack(Material.ARROW);
+        ItemMeta previousMeta = previous.getItemMeta();
 
         if (exitMeta != null) {
             exitMeta.setDisplayName("§l§4Exit");
             exit.setItemMeta(exitMeta);
         }
 
+        if (searchMeta != null) {
+            searchMeta.setDisplayName("§l§eSearch");
+            search.setItemMeta(searchMeta);
+        }
+
         // Fill inventory and open for player
-        loadSettings(inv, exit);
+        loadSettings(inv, exit, search, page, next, previous);
         player.openInventory(inv);
     }
 
-    /** Open per-module GUI to view and toggle a single module. */
+    /**
+     * Open per-module GUI to view and toggle a single module.
+     */
     public void partSettings(String key, Player player) {
 
         boolean value = plugin.getConfig().getBoolean("modules." + key);
@@ -101,7 +122,9 @@ public class CoreonHandler {
         player.openInventory(inv);
     }
 
-    /** Open confirmation GUI for enabling/disabling a module. */
+    /**
+     * Open confirmation GUI for enabling/disabling a module.
+     */
     public void deActiveSettings(String key, Player player) {
 
         boolean value = plugin.getConfig().getBoolean("modules." + key);
@@ -143,7 +166,9 @@ public class CoreonHandler {
         player.openInventory(inv);
     }
 
-    /** Toggle the module value in config and reopen its GUI. */
+    /**
+     * Toggle the module value in config and reopen its GUI.
+     */
     public void changeActive(String key, Player player) {
 
         boolean current = plugin.getConfig().getBoolean("modules." + key);
@@ -158,8 +183,22 @@ public class CoreonHandler {
         partSettings(key, player);
     }
 
-    /** Fill inventory with one book per module and an exit button. */
-    private void loadSettings(Inventory inv, ItemStack exit) {
+    public void searchAnvil(Player player, String title) {
+        Inventory inv = Bukkit.createInventory(player, InventoryType.ANVIL, Component.text(title));
+        if (inv instanceof AnvilInventory anvilInv) {
+            anvilInv.setFirstItem(new ItemStack(Material.PAPER));
+        }
+        player.openInventory(inv);
+
+        if (player.getOpenInventory() instanceof AnvilView anvilView) {
+            anvilView.setRepairCost(0);
+        }
+    }
+
+    /**
+     * Fill inventory with one book per module and an exit button.
+     */
+    private void loadSettings(Inventory inv, ItemStack exit, ItemStack search, ItemStack page, ItemStack next, ItemStack previous) {
 
         ConfigurationSection modulesSection = plugin.getConfig().getConfigurationSection("modules");
         if (modulesSection == null) return;
