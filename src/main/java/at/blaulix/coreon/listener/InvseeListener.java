@@ -30,11 +30,40 @@ public class InvseeListener implements Listener {
             return;
         }
 
-        if (event.getRawSlot() >= event.getView().getTopInventory().getSize()) return;
+        Inventory topInv = event.getView().getTopInventory();
+        boolean inTop = event.getRawSlot() < topInv.getSize();
+        boolean shiftFromBottom = event.isShiftClick() && event.getRawSlot() >= topInv.getSize();
 
-        plugin.getServer().getScheduler().runTask(plugin, () ->
-                handleChange(event.getInventory(), title)
-        );
+        if (!inTop && !shiftFromBottom) return;
+
+        if (shiftFromBottom) {
+            event.setCancelled(true);
+
+            ItemStack clicked = event.getCurrentItem();
+            if (clicked == null || clicked.getType().isAir()) return;
+
+            // Find first empty slot in topInv (skip separator slots 36-44)
+            int targetSlot = -1;
+            for (int i = 0; i < 36; i++) {
+                ItemStack existing = topInv.getItem(i);
+                if (existing == null || existing.getType().isAir()) {
+                    targetSlot = i;
+                    break;
+                }
+            }
+            if (targetSlot == -1) return;
+
+            topInv.setItem(targetSlot, clicked.clone());
+            event.setCurrentItem(null);
+
+            plugin.getServer().getScheduler().runTask(plugin, () ->
+                    handleChange(topInv, title)
+            );
+        } else {
+            plugin.getServer().getScheduler().runTask(plugin, () ->
+                    handleChange(topInv, title)
+            );
+        }
     }
 
     @EventHandler
@@ -49,8 +78,9 @@ public class InvseeListener implements Listener {
             }
         }
 
+        Inventory topInv = event.getView().getTopInventory();
         plugin.getServer().getScheduler().runTask(plugin, () ->
-                handleChange(event.getInventory(), title)
+                handleChange(topInv, title)
         );
     }
 
