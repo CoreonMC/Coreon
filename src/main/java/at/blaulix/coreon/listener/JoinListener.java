@@ -57,13 +57,19 @@ public class JoinListener implements Listener {
                 if (config.contains("inventory.offhand"))
                     player.getInventory().setItemInOffHand(config.getItemStack("inventory.offhand"));
 
+                player.updateInventory();
+
+                // Delay ender chest by 1 tick — Minecraft restores its own NBT ender chest
+                // data after PlayerJoinEvent fires, which would overwrite anything set here.
                 List<?> enderChest = config.getList("enderchest.content");
                 if (enderChest != null) {
-                    for (int i = 0; i < enderChest.size() && i < 27; i++)
-                        player.getEnderChest().setItem(i, (ItemStack) enderChest.get(i));
+                    final List<?> ecSnapshot = enderChest;
+                    plugin.getServer().getScheduler().runTask(plugin, () -> {
+                        if (!player.isOnline()) return;
+                        for (int i = 0; i < ecSnapshot.size() && i < 27; i++)
+                            player.getEnderChest().setItem(i, (ItemStack) ecSnapshot.get(i));
+                    });
                 }
-
-                player.updateInventory();
             });
         });
     }
