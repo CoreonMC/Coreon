@@ -30,10 +30,11 @@ public class InvseeListener implements Listener {
             return;
         }
 
-        if (event.getRawSlot() >= event.getView().getTopInventory().getSize()) return;
+        Inventory topInv = event.getView().getTopInventory();
+        if (event.getRawSlot() >= topInv.getSize()) return;
 
         plugin.getServer().getScheduler().runTask(plugin, () ->
-                handleChange(event.getInventory(), title)
+                handleChange(topInv, title)
         );
     }
 
@@ -49,8 +50,9 @@ public class InvseeListener implements Listener {
             }
         }
 
+        Inventory topInv = event.getView().getTopInventory();
         plugin.getServer().getScheduler().runTask(plugin, () ->
-                handleChange(event.getInventory(), title)
+                handleChange(topInv, title)
         );
     }
 
