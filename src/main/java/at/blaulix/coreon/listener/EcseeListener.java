@@ -2,9 +2,8 @@ package at.blaulix.coreon.listener;
 
 import at.blaulix.coreon.Coreon;
 import at.blaulix.coreon.handler.EcseeHandler;
+import at.blaulix.coreon.util.Playerdata;
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -12,10 +11,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
 
 /**
  * Handles inventory synchronization for the EcSee feature.
@@ -42,11 +37,18 @@ public class EcseeListener implements Listener {
         String title = event.getView().getTitle();
         if (!title.startsWith(EcseeHandler.TITLE_PREFIX)) return;
 
-        // Only handle clicks inside the top (EcSee) inventory
-        if (event.getRawSlot() >= event.getView().getTopInventory().getSize()) return;
+        Inventory topInv = event.getView().getTopInventory();
 
-        plugin.getServer().getScheduler().runTask(plugin, () ->
-                handleChange(event.getInventory(), title)
+        // Normal click in top inventory, OR shift-click from bottom inventory into top
+        boolean inTop = event.getRawSlot() < topInv.getSize();
+        boolean shiftFromBottom = event.isShiftClick() && event.getRawSlot() >= topInv.getSize();
+
+        if (!inTop && !shiftFromBottom) return;
+
+        // Shift+click: Bukkit moves the item after the event fires, so wait 2 ticks
+        int delay = shiftFromBottom ? 2 : 1;
+        plugin.getServer().getScheduler().runTaskLater(plugin, () ->
+                handleChange(topInv, title), delay
         );
     }
 
@@ -55,8 +57,10 @@ public class EcseeListener implements Listener {
         String title = event.getView().getTitle();
         if (!title.startsWith(EcseeHandler.TITLE_PREFIX)) return;
 
+        Inventory topInv = event.getView().getTopInventory();
+
         plugin.getServer().getScheduler().runTask(plugin, () ->
-                handleChange(event.getInventory(), title)
+                handleChange(topInv, title)
         );
     }
 
@@ -84,31 +88,24 @@ public class EcseeListener implements Listener {
 
     private void syncToOnlinePlayer(Inventory gui, Player target) {
         ItemStack[] contents = new ItemStack[27];
+        for (int i = 0; i < 27; i++) contents[i] = gui.getItem(i);
+
+        // Debug: log what we're writing
+        plugin.getLogger().info("[EcSee DEBUG] Syncing to " + target.getName() + ":");
         for (int i = 0; i < 27; i++) {
-            contents[i] = gui.getItem(i);
+            if (contents[i] != null) {
+                plugin.getLogger().info("  slot " + i + ": " + contents[i].getType() + " x" + contents[i].getAmount());
+            }
         }
+
         target.getEnderChest().setContents(contents);
         target.updateInventory();
+        Playerdata.saveOfflineEnderChest(target.getUniqueId().toString(), contents);
     }
 
     private void saveToYaml(Inventory gui, String uuid) {
-        File folder = new File("plugins/Coreon/playerdata");
-        if (!folder.exists()) folder.mkdirs();
-
-        File file = new File(folder, uuid + ".yml");
-        FileConfiguration config = YamlConfiguration.loadConfiguration(file);
-
         ItemStack[] contents = new ItemStack[27];
-        for (int i = 0; i < 27; i++) {
-            contents[i] = gui.getItem(i);
-        }
-
-        config.set("enderchest.content", Arrays.asList(contents));
-
-        try {
-            config.save(file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        for (int i = 0; i < 27; i++) contents[i] = gui.getItem(i);
+        Playerdata.saveOfflineEnderChest(uuid, contents);
     }
 }

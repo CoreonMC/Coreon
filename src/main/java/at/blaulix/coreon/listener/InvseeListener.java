@@ -30,10 +30,16 @@ public class InvseeListener implements Listener {
             return;
         }
 
-        if (event.getRawSlot() >= event.getView().getTopInventory().getSize()) return;
+        Inventory topInv = event.getView().getTopInventory();
 
-        plugin.getServer().getScheduler().runTask(plugin, () ->
-                handleChange(event.getInventory(), title)
+        boolean inTop = event.getRawSlot() < topInv.getSize();
+        boolean shiftFromBottom = event.isShiftClick() && event.getRawSlot() >= topInv.getSize();
+
+        if (!inTop && !shiftFromBottom) return;
+
+        int delay = shiftFromBottom ? 2 : 1;
+        plugin.getServer().getScheduler().runTaskLater(plugin, () ->
+                handleChange(topInv, title), delay
         );
     }
 
@@ -49,8 +55,9 @@ public class InvseeListener implements Listener {
             }
         }
 
+        Inventory topInv = event.getView().getTopInventory();
         plugin.getServer().getScheduler().runTask(plugin, () ->
-                handleChange(event.getInventory(), title)
+                handleChange(topInv, title)
         );
     }
 
