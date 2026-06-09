@@ -15,13 +15,30 @@ import java.util.Objects;
 
 public final class Coreon extends JavaPlugin {
 
+    private static Coreon instance;
+
     private final File commandDescriptions = new File(getDataFolder(), "command_descriptions.yml");
     private ModuleManager moduleManager;
     private FileConfiguration homesConfig;
+    private FileConfiguration messages;
+
+    public static Coreon getInstance() {
+        return instance;
+    }
+
+    public FileConfiguration getMessages() {
+        return messages;
+    }
 
     @Override
     public void onEnable() {
+        instance = this;
         saveDefaultConfig();
+
+        // Load messages.yml
+        File messagesFile = new File(getDataFolder(), "message.yml");
+        if (!messagesFile.exists()) saveResource("message.yml", false);
+        messages = YamlConfiguration.loadConfiguration(messagesFile);
 
         // 1. Handlers initialisieren
         CoreonHandler coreonHandler = new CoreonHandler(this);
@@ -51,6 +68,7 @@ public final class Coreon extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        instance = null;
         HomeDatabase.getAll().forEach(HomeDatabase::disconnect);
     }
 
