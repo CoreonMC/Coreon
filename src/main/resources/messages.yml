@@ -1,0 +1,14 @@
+messages:
+  home-set: "&aHome &b%home%&a gesetzt!"
+  home-deleted: "&cHome &b%home%&c gelöscht!"
+  home-teleported: "&aZu &b%home%&a teleportiert!"
+  home-not-exist: "&cDieses Home existiert nicht!"
+  home-list: "&aHomes: &b%homes%"
+  max-homes: "&cMaximale Anzahl erreicht (%limit%)!"
+
+  home-help: |
+    &aHome Hilfe:
+    &b/home set <name> &7- Setzt ein Home
+    &b/home delete <name> &7- Löscht ein Home
+    &b/home list &7- Zeigt Homes
+    &b/home <name> &7- Teleportiert dich
