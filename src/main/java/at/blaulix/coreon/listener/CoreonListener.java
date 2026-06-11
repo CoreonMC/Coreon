@@ -1,20 +1,19 @@
 package at.blaulix.coreon.listener;
 
 import at.blaulix.coreon.handler.CoreonHandler;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.AnvilInventory;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-
-import java.util.Map;
-import java.util.TreeMap;
 
 public class CoreonListener implements Listener {
 
-    // Handles GUI logic and module actions
     private final CoreonHandler handler;
 
     public CoreonListener(CoreonHandler handler) {
@@ -24,85 +23,98 @@ public class CoreonListener implements Listener {
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
 
-        // Ensure the clicker is a player
+        Inventory inv = event.getInventory();
+
         if (!(event.getWhoClicked() instanceof Player player)) return;
 
-        // Get inventory title (remove colors, lowercase for comparison)
         String title = ChatColor.stripColor(event.getView().getTitle()).toLowerCase();
 
-        // Get "modules" section from config
         ConfigurationSection modulesSection = handler.getPlugin().getConfig().getConfigurationSection("modules");
+
         if (modulesSection == null) return;
 
-        // Get clicked item
         ItemStack clicked = event.getCurrentItem();
         if (clicked == null || !clicked.hasItemMeta()) return;
 
-        // Get item display name (remove colors, lowercase)
         String itemName = ChatColor.stripColor(clicked.getItemMeta().getDisplayName()).toLowerCase();
 
-        // Main settings GUI
+        // MAIN GUI
         if (title.equals("coreon settings")) {
-            event.setCancelled(true); // Prevent item movement
 
-            // Exit Button
+            event.setCancelled(true);
+
             if (itemName.equals("exit")) {
                 player.closeInventory();
                 return;
             }
-            if(itemName.equals("search")){
-                handler.searchAnvil(player, "Search Modules");
+
+            if (itemName.equals("search")) {
+                handler.searchAnvil(player, "Search for Modules");
                 return;
             }
-            // Check if module exists in config
+
             if (!modulesSection.contains(itemName)) return;
 
-            // Open module submenu
             handler.partSettings(itemName, player);
             return;
         }
 
-        if (title.equals("search modules")) {
-            event.setCancelled(true); // Prevent item movement
-            if (!modulesSection.contains(itemName)) return;
+        // SEARCH GUI
+        if (title.equalsIgnoreCase("search for modules")) {
 
-            Map<String, Object> modules = new TreeMap<>();
-            for (String key : modulesSection.getKeys(false)) {
-                String displayName = handler.getPlugin().getConfig().getString("modules." + key + ".display-name");
-                if (displayName != null && itemName.contains(displayName.toLowerCase())) {
-                    modules.put(key, displayName);
-                }
+            event.setCancelled(true);
+
+            // Nur rechter Slot
+            if (event.getRawSlot() != 2) return;
+
+            if (!(event.getView().getTopInventory() instanceof AnvilInventory anvil)) {
+                return;
             }
 
-            handler.partSettings(itemName, player);
+            String searchText = "";
+
+            ItemStack result = anvil.getItem(2);
+
+            if (result != null && result.hasItemMeta() && result.getItemMeta().hasDisplayName()) {
+
+                searchText = ChatColor.stripColor(result.getItemMeta().getDisplayName());
+            }
+
+            final String finalSearchText = searchText.toLowerCase().trim();
+
+            player.closeInventory();
+
+            Bukkit.getScheduler().runTask(handler.getPlugin(), () -> handler.openFilteredSettings(player, finalSearchText));
+
+            return;
+
         }
 
-        // Module submenu
+        // MODULE MENU
         if (modulesSection.contains(title)) {
-            event.setCancelled(true); // Prevent item movement
-            // Back Button
-            if (itemName.equals("back")){
+
+            event.setCancelled(true);
+
+            if (itemName.equals("back")) {
                 handler.coreonSettings(player);
                 return;
             }
-            // Open activation/deactivation menu
+
             handler.deActiveSettings(title, player);
             return;
         }
 
-        // Confirmation menu for (de-)activation
+        // ACTIVATE / DEACTIVATE
         if (title.startsWith("(de-)activation ")) {
+
             event.setCancelled(true);
 
-            // Extract module key from title
             String key = title.substring("(de-)activation ".length());
 
-            // Confirm activation toggle
             if (itemName.startsWith("confirm")) {
                 handler.changeActive(key, player);
             }
 
-            // Return to module menu
             if (itemName.startsWith("cancel")) {
                 handler.partSettings(key, player);
             }
