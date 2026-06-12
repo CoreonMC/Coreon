@@ -9,13 +9,13 @@ dass Zustände, Business‑Logik und Modulverwaltung sauber getrennt und live ak
 ## Muss-Ziele:
 - [x] Module über Ingame GUI einstellbar (Flixlix)
 - [x] Invsee - Inventar eines Spielers anschauen und in echtzeit Items rausnehmen können(Nilsch)
-- [ ] Homes - Home setzen /sethome <name>, teleportieren zum Home /home <name>, löschen von Home /deletehome <name>(Flixlix)
+- [x] Homes - Home setzen /sethome <name>, teleportieren zum Home /home <name>, löschen von Home /deletehome <name>(Flixlix)
 - [x] Vanish - Unsichtbar für jeden und so als wäre man offline /vanish (Nilsch + Flixlix)
 - [x] leicht bedienbar - DAU-Friendly(Flixlix + Nilsch)
 
 ## Kann-Ziele:
-- [ ] Invsee bei offline-Spielern (Nilsch)
-- [ ] ec; ecsee - Enderchest von sich selbst oder eines anderen Spielers anschauen und in Items rausnehmen können (Nilsch)
+- [x] Invsee bei offline-Spielern (Nilsch)
+- [x] ec; ecsee - Enderchest von sich selbst oder eines anderen Spielers anschauen und in Items rausnehmen können (Nilsch)
 - [ ] Bei rejoin prüfen ob Spieler vanish perms hat (Flixlix=
 - [ ] warps - warp setzen /setwarp <name>, teleportieren zu warp /warp <name>, löschen von warp /deletewarp <name> (Admin-Only) (Flixlix + Nilsch)
 - [ ] rtp; tpa - rtp(Random Teleport) in gewissem Radius tpt werden, tpa (Teleport Anfrage) an andere Spieler senden und annehmen/ablehnen können (Flixlix + Nilsch)
