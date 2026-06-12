@@ -2,262 +2,275 @@ package at.blaulix.coreon.handler;
 
 import at.blaulix.coreon.Coreon;
 import at.blaulix.coreon.util.Formats;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.view.AnvilView;
 
-import java.util.Collections;
+import java.util.*;
 
 public class CoreonHandler {
 
     private final Coreon plugin;
 
+    // Per-player search state (persists across opens)
+    private final Map<UUID, SearchState> searchStates   = new HashMap<>();
+    // Players currently waiting for chat input
+    private final Set<UUID>              searchingPlayers = new HashSet<>();
+
     public CoreonHandler(Coreon plugin) {
         this.plugin = plugin;
     }
 
-    public Coreon getPlugin() {
-        return plugin;
+    public Coreon getPlugin() { return plugin; }
+
+    // ─── Per-player SearchState ───────────────────────────────────────────────
+
+    public SearchState getSearchState(Player player) {
+        return searchStates.computeIfAbsent(player.getUniqueId(), k -> new SearchState());
     }
 
-    private Inventory inv;
+    // ─── Main Settings GUI ────────────────────────────────────────────────────
 
-    // MAIN SETTINGS
     public void coreonSettings(Player player) {
-
-        ConfigurationSection modulesSection = plugin.getConfig().getConfigurationSection("modules");
-
-        if (modulesSection == null) {
-            player.sendMessage("§cNo modules section found in config!");
-            return;
+        if (plugin.getConfig().getConfigurationSection("modules") == null) {
+            player.sendMessage("§cNo modules section found in config!"); return;
         }
-
-        inv = Bukkit.createInventory(null, 36, "Coreon Settings");
-
-        ItemStack exit = new ItemStack(Material.BARRIER);
-
-        ItemMeta exitMeta = exit.getItemMeta();
-
-        if (exitMeta != null) {
-            exitMeta.setDisplayName("§l§4Exit");
-            exit.setItemMeta(exitMeta);
-        }
-
-        ItemStack search = new ItemStack(Material.COMPASS);
-
-        ItemMeta searchMeta = search.getItemMeta();
-
-        if (searchMeta != null) {
-            searchMeta.setDisplayName("§l§eSearch");
-            search.setItemMeta(searchMeta);
-        }
-
-        loadSettings(inv, exit, search);
-
+        Inventory inv = Bukkit.createInventory(null, 54, "§8Coreon Settings");
+        loadSettings(inv, player);
         player.openInventory(inv);
     }
 
-    public void searchAnvil(Player player, String title) {
+    // ─── Populate main settings inventory ────────────────────────────────────
 
-        Inventory inv = Bukkit.createInventory(player, InventoryType.ANVIL, Component.text(title));
+    public void loadSettings(Inventory inv, Player player) {
+        inv.clear();
+        ConfigurationSection modules = plugin.getConfig().getConfigurationSection("modules");
+        if (modules == null) return;
 
-        player.openInventory(inv);
+        SearchState state = getSearchState(player);
 
-        // 1 Tick warten bis GUI komplett offen ist
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+        // Collect + filter
+        List<String> keys = new ArrayList<>(modules.getKeys(false));
+        keys.removeIf(k -> !state.matches(k));
 
-            Inventory top = player.getOpenInventory().getTopInventory();
+        // Sort
+        switch (state.getSortMode()) {
+            case AZ             -> Collections.sort(keys);
+            case ZA             -> keys.sort(Comparator.reverseOrder());
+            case ENABLED_FIRST  -> keys.sort(Comparator.comparingInt(k ->
+                    modules.getBoolean(k) ? 0 : 1));
+            case DISABLED_FIRST -> keys.sort(Comparator.comparingInt(k ->
+                    modules.getBoolean(k) ? 1 : 0));
+        }
 
-            // Sicherstellen, dass noch das richtige Inventory offen ist
-            if (top.getType() != InventoryType.ANVIL) {
-                return;
-            }
-
-            ItemStack paper = new ItemStack(Material.PAPER);
-
-            ItemMeta meta = paper.getItemMeta();
-
+        // Place module items
+        int slot = 0;
+        for (String key : keys) {
+            boolean enabled = modules.getBoolean(key);
+            ItemStack item = new ItemStack(enabled ? Material.LIME_DYE : Material.GRAY_DYE);
+            ItemMeta meta = item.getItemMeta();
             if (meta != null) {
-                meta.setDisplayName(" ");
-                paper.setItemMeta(meta);
+                meta.setDisplayName((enabled ? "§a" : "§c") + Formats.capitalizeFirstChar(key));
+                meta.setLore(Collections.singletonList(
+                        enabled ? "§7Status: §aEnabled" : "§7Status: §cDisabled"));
+                item.setItemMeta(meta);
             }
+            inv.setItem(slot++, item);
+        }
 
-            // DIREKT SLOT 0 setzen
-            top.setItem(0, paper);
-
-            // Wichtig bei Paper 1.21+
-            player.updateInventory();
-
-        }, 1L);
+        // Bottom bar: slots 45-53
+        inv.setItem(45, createExitItem());
+        inv.setItem(49, createSearchItem(state));
+        inv.setItem(53, createSortIndicator(state));
     }
 
-    // FILTERED SEARCH RESULT
-    public void openFilteredSettings(Player player, String searchText) {
+    // ─── Search Menu (3 rows) ─────────────────────────────────────────────────
+    // Layout:
+    //  Row 0 (slots 0-2):  Startswith | Contains | Endswith
+    //  Row 1 (slots 9-12): A→Z | Z→A | Enabled first | Disabled first
+    //  Row 2 (slot 22):    🔍 Suchen   |  slot 18: Back
 
-        ConfigurationSection modulesSection = plugin.getConfig().getConfigurationSection("modules");
-
-        if (modulesSection == null) return;
-
-        Inventory inv = Bukkit.createInventory(null, 36, "Coreon Settings");
-
-        ItemStack exit = new ItemStack(Material.BARRIER);
-
-        ItemMeta exitMeta = exit.getItemMeta();
-
-        if (exitMeta != null) {
-            exitMeta.setDisplayName("§l§4Exit");
-            exit.setItemMeta(exitMeta);
-        }
-
-        inv.setItem(35, exit);
-
-        for (String key : modulesSection.getKeys(false)) {
-
-            if (!key.toLowerCase().contains(searchText.toLowerCase())) {
-                continue;
-            }
-
-            boolean value = modulesSection.getBoolean(key);
-
-            ItemStack book = new ItemStack(Material.BOOK);
-
-            ItemMeta meta = book.getItemMeta();
-
-            if (meta != null) {
-                meta.setDisplayName("§l§2" + Formats.capitalizeFirstChar(key));
-
-                meta.setLore(Collections.singletonList("§bActivated: " + value));
-
-                book.setItemMeta(meta);
-            }
-
-            inv.addItem(book);
-        }
-
+    public void openSearchMenu(Player player) {
+        SearchState state = getSearchState(player);
+        Inventory inv = Bukkit.createInventory(null, 27, "§8Coreon §7Search Settings");
+        refreshSearchMenu(inv, state);
         player.openInventory(inv);
     }
 
-    // MODULE SETTINGS
-    public void partSettings(String key, Player player) {
-
-        boolean value = plugin.getConfig().getBoolean("modules." + key);
-
-        String invTitle = "§l§2" + Formats.capitalizeFirstChar(key);
-
-        inv = Bukkit.createInventory(null, 36, invTitle);
-
-        ItemStack toggle = new ItemStack(Material.LEVER);
-
-        ItemMeta toggleMeta = toggle.getItemMeta();
-
-        ItemStack back = new ItemStack(Material.BARRIER);
-
-        ItemMeta backMeta = back.getItemMeta();
-
-        if (toggleMeta != null) {
-
-            toggleMeta.setDisplayName("§l§bToggle " + Formats.capitalizeFirstChar(key));
-
-            toggleMeta.setLore(Collections.singletonList("§5Activated: " + value));
-
-            toggle.setItemMeta(toggleMeta);
-        }
-
-        if (backMeta != null) {
-            backMeta.setDisplayName("§l§4Back");
-
-            back.setItemMeta(backMeta);
-        }
-
-        inv.setItem(13, toggle);
-        inv.setItem(35, back);
-
-        player.openInventory(inv);
-    }
-
-    // ACTIVATE GUI
-    public void deActiveSettings(String key, Player player) {
-
-        boolean value = plugin.getConfig().getBoolean("modules." + key);
-
-        inv = Bukkit.createInventory(null, 36, "§l§2(De-)Activation " + Formats.capitalizeFirstChar(key));
-
-        ItemStack confirm = new ItemStack(Material.GREEN_STAINED_GLASS_PANE);
-
-        ItemMeta confirmMeta = confirm.getItemMeta();
-
-        ItemStack cancel = new ItemStack(Material.RED_STAINED_GLASS_PANE);
-
-        ItemMeta cancelMeta = cancel.getItemMeta();
-
-        if (confirmMeta != null) {
-            confirmMeta.setDisplayName("§l§aConfirm");
-
-            confirm.setItemMeta(confirmMeta);
-        }
-
-        if (cancelMeta != null) {
-            cancelMeta.setDisplayName("§l§4Cancel");
-
-            cancel.setItemMeta(cancelMeta);
-        }
-
-        inv.setItem(21, confirm);
-        inv.setItem(23, cancel);
-
-        player.openInventory(inv);
-    }
-
-    public void changeActive(String key, Player player) {
-
-        boolean current = plugin.getConfig().getBoolean("modules." + key);
-
-        plugin.getConfig().set("modules." + key, !current);
-
-        plugin.saveConfig();
-
-        plugin.applyModule(key);
-
-        partSettings(key, player);
-    }
-
-    private void loadSettings(Inventory inv, ItemStack exit, ItemStack search) {
-
-        ConfigurationSection modulesSection = plugin.getConfig().getConfigurationSection("modules");
-
-        if (modulesSection == null) return;
-
+    public void refreshSearchMenu(Inventory inv, SearchState state) {
         inv.clear();
 
-        inv.setItem(35, exit);
-        inv.setItem(31, search);
+        // ── Match mode row ──
+        inv.setItem(0,  matchItem(SearchState.MatchMode.STARTSWITH, state, Material.ARROW,         "§bStartswith",     "§7Nur Module die §bbeginnen §7mit dem Begriff"));
+        inv.setItem(1,  matchItem(SearchState.MatchMode.CONTAINS,   state, Material.PAPER,         "§bContains",       "§7Module die den Begriff §benthalten"));
+        inv.setItem(2,  matchItem(SearchState.MatchMode.ENDSWITH,   state, Material.FEATHER,       "§bEndswith",       "§7Nur Module die §benden §7mit dem Begriff"));
 
-        for (String key : modulesSection.getKeys(false)) {
+        // ── Sort mode row ──
+        inv.setItem(9,  sortItem(SearchState.SortMode.AZ,             state, Material.OAK_SIGN,   "§eA → Z",          "§7Alphabetisch aufsteigend"));
+        inv.setItem(10, sortItem(SearchState.SortMode.ZA,             state, Material.DARK_OAK_SIGN, "§eZ → A",        "§7Alphabetisch absteigend"));
+        inv.setItem(11, sortItem(SearchState.SortMode.ENABLED_FIRST,  state, Material.LIME_WOOL,  "§aEnabled first",  "§7Aktivierte Module zuerst"));
+        inv.setItem(12, sortItem(SearchState.SortMode.DISABLED_FIRST, state, Material.RED_WOOL,   "§cDisabled first", "§7Deaktivierte Module zuerst"));
 
-            boolean value = modulesSection.getBoolean(key);
+        // ── Back ──
+        ItemStack back = new ItemStack(Material.ARROW);
+        ItemMeta bm = back.getItemMeta();
+        if (bm != null) { bm.setDisplayName("§7Back"); back.setItemMeta(bm); }
+        inv.setItem(18, back);
 
-            ItemStack book = new ItemStack(Material.BOOK);
-
-            ItemMeta meta = book.getItemMeta();
-
-            if (meta != null) {
-
-                meta.setDisplayName("§l§2" + Formats.capitalizeFirstChar(key));
-
-                meta.setLore(Collections.singletonList("§bActivated: " + value));
-
-                book.setItemMeta(meta);
-            }
-
-            inv.addItem(book);
+        // ── Search / execute ──
+        ItemStack go = new ItemStack(Material.NETHER_STAR);
+        ItemMeta gm = go.getItemMeta();
+        if (gm != null) {
+            gm.setDisplayName("§a§lSuchen");
+            gm.setLore(Arrays.asList(
+                    "§7Aktueller Begriff: §b" + (state.getQuery().isEmpty() ? "§o(leer)" : state.getQuery()),
+                    "§7Modus: §b" + matchLabel(state.getMatchMode()),
+                    "§7Sortierung: §e" + sortLabel(state.getSortMode()),
+                    "",
+                    "§7Klick zum Eingeben eines neuen Begriffs",
+                    "§7oder §aEnter §7ohne Text für alle Module"
+            ));
+            go.setItemMeta(gm);
         }
+        inv.setItem(22, go);
+    }
+
+    private ItemStack matchItem(SearchState.MatchMode mode, SearchState state,
+                                Material mat, String name, String desc) {
+        boolean active = state.getMatchMode() == mode;
+        ItemStack item = new ItemStack(active ? Material.CYAN_STAINED_GLASS_PANE : mat);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(active ? "§a§l✔ " + name : "§7" + name);
+            meta.setLore(Arrays.asList(desc, active ? "§a§oAktiv" : "§8Klick zum Auswählen"));
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+
+    private ItemStack sortItem(SearchState.SortMode mode, SearchState state,
+                               Material mat, String name, String desc) {
+        boolean active = state.getSortMode() == mode;
+        ItemStack item = new ItemStack(active ? Material.YELLOW_STAINED_GLASS_PANE : mat);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(active ? "§a§l✔ " + name : "§7" + name);
+            meta.setLore(Arrays.asList(desc, active ? "§a§oAktiv" : "§8Klick zum Auswählen"));
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+
+    private String matchLabel(SearchState.MatchMode m) {
+        return switch (m) {
+            case STARTSWITH -> "Startswith";
+            case CONTAINS   -> "Contains";
+            case ENDSWITH   -> "Endswith";
+        };
+    }
+
+    private String sortLabel(SearchState.SortMode s) {
+        return switch (s) {
+            case AZ             -> "A → Z";
+            case ZA             -> "Z → A";
+            case ENABLED_FIRST  -> "Enabled first";
+            case DISABLED_FIRST -> "Disabled first";
+        };
+    }
+
+    // ─── Chat input flow ──────────────────────────────────────────────────────
+
+    public void enterSearchInput(Player player) {
+        searchingPlayers.add(player.getUniqueId());
+        player.closeInventory();
+        player.sendMessage("§8[§bCoreon§8] §7Suchbegriff eingeben §8(§ccancel§8 §7= Abbrechen, §aEnter §7= alle§8)§7:");
+    }
+
+    public boolean isSearching(Player player) {
+        return searchingPlayers.contains(player.getUniqueId());
+    }
+
+    public void handleSearchInput(Player player, String input) {
+        searchingPlayers.remove(player.getUniqueId());
+        if (input.equalsIgnoreCase("cancel")) {
+            openSearchMenu(player);
+            return;
+        }
+        getSearchState(player).setQuery(input.trim());
+        coreonSettings(player);
+    }
+
+    // ─── Helper items for main GUI ────────────────────────────────────────────
+
+    private ItemStack createExitItem() {
+        ItemStack item = new ItemStack(Material.BARRIER);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) { meta.setDisplayName("§cExit"); item.setItemMeta(meta); }
+        return item;
+    }
+
+    private ItemStack createSearchItem(SearchState state) {
+        ItemStack item = new ItemStack(Material.COMPASS);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName("§bSearch");
+            meta.setLore(Arrays.asList(
+                    "§7Begriff: §b" + (state.getQuery().isEmpty() ? "§o(alle)" : state.getQuery()),
+                    "§7Modus: §b"  + matchLabel(state.getMatchMode()),
+                    "§7Sort: §e"   + sortLabel(state.getSortMode()),
+                    "",
+                    "§7Klick zum Öffnen der Sucheinstellungen"
+            ));
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+
+    private ItemStack createSortIndicator(SearchState state) {
+        ItemStack item = new ItemStack(Material.HOPPER);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName("§eSortierung: §f" + sortLabel(state.getSortMode()));
+            meta.setLore(Collections.singletonList("§7Klick für Sucheinstellungen"));
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+
+    // ─── Module Toggle ────────────────────────────────────────────────────────
+
+    public void partSettings(String moduleName, Player player) {
+        ConfigurationSection modules = plugin.getConfig().getConfigurationSection("modules");
+        if (modules == null || !modules.contains(moduleName)) return;
+        plugin.getConfig().set("modules." + moduleName, !modules.getBoolean(moduleName));
+        plugin.saveConfig();
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            Inventory open = player.getOpenInventory().getTopInventory();
+            loadSettings(open, player);
+            player.updateInventory();
+        });
+    }
+
+    public void changeActive(String moduleName, Player player) {
+        partSettings(moduleName, player);
+    }
+
+    // ─── Confirm/Cancel screen ────────────────────────────────────────────────
+
+    public void deActiveSettings(String moduleName, Player player) {
+        Inventory inv = Bukkit.createInventory(null, 27, "§8(de-)activation §7" + moduleName);
+        ItemStack confirm = new ItemStack(Material.GREEN_WOOL);
+        ItemMeta cm = confirm.getItemMeta();
+        if (cm != null) { cm.setDisplayName("§aConfirm"); confirm.setItemMeta(cm); }
+        ItemStack cancel = new ItemStack(Material.RED_WOOL);
+        ItemMeta rm = cancel.getItemMeta();
+        if (rm != null) { rm.setDisplayName("§cCancel"); cancel.setItemMeta(rm); }
+        inv.setItem(11, confirm);
+        inv.setItem(15, cancel);
+        player.openInventory(inv);
     }
 }
