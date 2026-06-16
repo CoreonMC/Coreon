@@ -9,11 +9,19 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+/**
+ * Command zum Löschen eines Homes (/home delete &lt;name&gt;).
+ */
 public class DeleteHomeCommand implements CommandExecutor {
     private final Coreon plugin;
     private final HomeDatabase homeDatabase;
 
-    // Direct use of Coreon instead of generic JavaPlugin simplifies casting later
+    /**
+     * Konstruktor.
+     *
+     * @param plugin       Coreon Plugin-Instanz
+     * @param homeDatabase HomeDatabase-Wrapper
+     */
     public DeleteHomeCommand(Coreon plugin, HomeDatabase homeDatabase) {
         this.plugin = plugin;
         this.homeDatabase = homeDatabase;

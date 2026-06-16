@@ -9,11 +9,19 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+/**
+ * Command zum Setzen eines Homes (/home set &lt;name&gt;).
+ */
 public class SetHomeCommand implements CommandExecutor {
     private final Coreon plugin;
     private final HomeDatabase homeDatabase;
 
-    // Direct use of Coreon instead of generic JavaPlugin simplifies casting later
+    /**
+     * Konstruktor.
+     *
+     * @param plugin       Coreon Plugin-Instanz
+     * @param homeDatabase HomeDatabase-Wrapper
+     */
     public SetHomeCommand(Coreon plugin, HomeDatabase homeDatabase) {
         this.plugin = plugin;
         this.homeDatabase = homeDatabase;

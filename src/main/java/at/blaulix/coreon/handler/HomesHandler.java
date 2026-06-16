@@ -15,11 +15,21 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Handler für das Homes-System: asynchrone Speicherung/Laden und Teleport-Logik
+ * inklusive Delay/Bewegungs-Checks, Auflisten und Hilfe-Ausgabe.
+ */
 public class HomesHandler {
 
     private final JavaPlugin javaPlugin;
     private final HomeDatabase homeDatabase;
 
+    /**
+     * Erzeugt einen neuen HomesHandler.
+     *
+     * @param plugin       Plugin-Instanz
+     * @param homeDatabase Home-Datenbank-Wrapper
+     */
     public HomesHandler(Coreon plugin, HomeDatabase homeDatabase) {
 
         this.javaPlugin = plugin;
@@ -27,7 +37,10 @@ public class HomesHandler {
     }
 
     /**
-     * Set a home asynchronously
+     * Legt asynchron ein Home für einen Spieler fest und sendet eine Rückmeldung.
+     *
+     * @param player   Spieler
+     * @param homeName Name des Homes
      */
     public void setHome(Player player, String homeName) {
 
@@ -66,7 +79,10 @@ public class HomesHandler {
     }
 
     /**
-     * Delete a home
+     * Löscht asynchron ein Home eines Spielers und zeigt eine Aktion an.
+     *
+     * @param player   Spieler
+     * @param homeName Name des zu löschenden Homes
      */
     public void deleteHome(Player player, String homeName) {
 
@@ -87,7 +103,10 @@ public class HomesHandler {
     }
 
     /**
-     * Get amount of homes
+     * Liefert die Anzahl gespeicherter Homes eines Spielers.
+     *
+     * @param player Spieler
+     * @return Anzahl der Homes
      */
     public int getHomeCount(Player player) {
 
@@ -95,7 +114,11 @@ public class HomesHandler {
     }
 
     /**
-     * Teleport player to home
+     * Teleportiert einen Spieler asynchron zu einem Home. Führt Delay-Countdown
+     * und Bewegungsprüfungen aus, es sei denn entsprechende Permissions erlauben das Bypass.
+     *
+     * @param player   Spieler
+     * @param homeName Name des Ziels
      */
     public void teleportToHome(Player player, String homeName) {
 
@@ -186,7 +209,9 @@ public class HomesHandler {
     }
 
     /**
-     * List all homes
+     * Listet alle Homes eines Spielers asynchron auf und sendet die formatierte Nachricht.
+     *
+     * @param player Spieler
      */
     public void listHomes(Player player) {
 
@@ -209,7 +234,9 @@ public class HomesHandler {
     }
 
     /**
-     * Show help
+     * Sendet die Hilfe-Nachricht zum Homes-System an den Spieler.
+     *
+     * @param player Spieler
      */
     public void helpHomes(Player player) {
 

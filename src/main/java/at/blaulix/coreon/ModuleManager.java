@@ -18,6 +18,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
+/**
+ * Verwalter für optionale Module des Plugins. Aktiviert bzw. deaktiviert Commands
+ * und schreibt bei Bedarf premade-Konfigurationen in die config.yml.
+ */
 public class ModuleManager {
 
     private final Coreon plugin;
@@ -53,6 +57,14 @@ public class ModuleManager {
         }
     };
 
+    /**
+     * Erzeugt einen neuen ModuleManager und legt die realen Command-Executoren an.
+     *
+     * @param plugin        Plugin-Instanz
+     * @param pvpTimerHandler Handler für PvP-Timer-Logik
+     * @param vanishHandler  Handler für Vanish-Logik
+     * @param homeDatabase   Datenbank-Wrapper für Homes
+     */
     public ModuleManager(Coreon plugin,
                          PvPTimerHandler pvpTimerHandler,
                          VanishHandler vanishHandler,
@@ -70,14 +82,20 @@ public class ModuleManager {
         realExecutors.put("ecsee",      new EcseeCommand());
     }
 
-    /** Alle Module einmalig beim Start anwenden. */
+    /**
+     * Wendet alle definierten Module gemäß der aktuellen Konfiguration an.
+     */
     public void applyAll() {
         for (String key : MODULES.keySet()) {
             apply(key);
         }
     }
 
-    /** Ein einzelnes Modul anwenden (z.B. nach Live-Toggle). */
+    /**
+     * Wendet ein einzelnes Modul an oder deaktiviert es, abhängig von der config.
+     *
+     * @param key Schlüssel des Moduls (z.B. "homes", "vanish")
+     */
     public void apply(String key) {
         ModuleDefinition def = MODULES.get(key.toLowerCase());
         if (def == null) return;

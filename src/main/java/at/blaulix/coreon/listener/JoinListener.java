@@ -24,10 +24,24 @@ public class JoinListener implements Listener {
 
     private final Coreon plugin;
 
+
+    /**
+     * Konstruktor.
+     *
+     * @param plugin Plugin-Instanz
+     */
     public JoinListener(Coreon plugin) {
         this.plugin = plugin;
     }
 
+    /**
+     * Wird beim Join eines Spielers aufgerufen und wendet ggf. gespeicherte
+     * Inventar- und Enderchest-Änderungen (z. B. durch InvSee/EcSee) an.
+     * Dateizugriffe werden asynchron ausgeführt; Inventaränderungen auf dem
+     * Hauptthread angewendet.
+     *
+     * @param event PlayerJoinEvent
+     */
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();

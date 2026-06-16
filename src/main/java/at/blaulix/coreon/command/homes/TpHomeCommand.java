@@ -9,10 +9,19 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+/**
+ * Command zum Teleportieren zu einem Home (/home &lt;name&gt;).
+ */
 public class TpHomeCommand implements CommandExecutor {
     private final JavaPlugin javaPlugin;
     private final HomeDatabase homeDatabase;
 
+    /**
+     * Konstruktor.
+     *
+     * @param plugin       Plugin-Instanz
+     * @param homeDatabase HomeDatabase-Wrapper
+     */
     public TpHomeCommand(JavaPlugin plugin, HomeDatabase homeDatabase) {
         this.javaPlugin = plugin;
         this.homeDatabase = homeDatabase;

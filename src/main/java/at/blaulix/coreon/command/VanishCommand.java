@@ -7,11 +7,18 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Command handler für /vanish – toggelt den Vanish-Status eines Spielers.
+ */
 public class VanishCommand implements CommandExecutor {
 
     private final VanishHandler vanishHandler;
 
-    // Nur ein Argument im Konstruktor: der VanishHandler
+    /**
+     * Konstruktor mit VanishHandler.
+     *
+     * @param vanishHandler VanishHandler
+     */
     public VanishCommand(VanishHandler vanishHandler) {
         this.vanishHandler = vanishHandler;
     }

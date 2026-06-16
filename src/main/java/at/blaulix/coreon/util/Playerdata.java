@@ -9,11 +9,21 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
+/**
+ * Hilfsklasse zum Speichern und Wiederherstellen von Spieler-Inventory- und Enderchest-Daten
+ * in YAML-Dateien unter plugins/Coreon/playerdata.
+ */
 public class Playerdata {
 
     /**
      * Save player's full inventory (content, armor, offhand) AND ender chest
      * to a YAML file under plugins/Coreon/playerdata/<uuid>.yml
+     */
+    /**
+     * Speichert das vollständige Inventar (inkl. Rüstung und Offhand) und EnderChest eines Spielers
+     * in eine YAML-Datei unter plugins/Coreon/playerdata/{uuid}.yml.
+     *
+     * @param player Spieler dessen Daten gespeichert werden sollen
      */
     public static void savePlayerData(Player player) {
         File folder = new File("plugins/Coreon/playerdata");
@@ -39,6 +49,15 @@ public class Playerdata {
      * Save modified offline inventory data back to the YAML file.
      * Called by InvseeListener when a viewer edits an offline player's inventory.
      */
+    /**
+     * Schreibt Änderungen an einem Offline-Spieler-Inventar zurück in die YAML-Datei.
+     * Wird z.B. von InvseeListener aufgerufen, wenn ein Betrachter das Inventar bearbeitet.
+     *
+     * @param uuid    UUID des betroffenen Spielers (als String)
+     * @param content Inhalte des Hauptinventars
+     * @param armor   Inhalte der Rüstungsslots
+     * @param offhand Offhand-Item
+     */
     public static void saveOfflineInventory(String uuid, ItemStack[] content, ItemStack[] armor, ItemStack offhand) {
         File folder = new File("plugins/Coreon/playerdata");
         if (!folder.exists()) folder.mkdirs();
@@ -60,6 +79,13 @@ public class Playerdata {
     /**
      * Save modified offline ender chest data back to the YAML file.
      * Called by EcseeListener when a viewer edits a player's ender chest.
+     */
+    /**
+     * Schreibt Änderungen am EnderChest eines Offline-Spielers zurück in die YAML-Datei.
+     * Wird z.B. von EcseeListener aufgerufen, wenn ein Betrachter das EnderChest bearbeitet.
+     *
+     * @param uuid     UUID des betroffenen Spielers (als String)
+     * @param contents Inhalte des EnderChests
      */
     public static void saveOfflineEnderChest(String uuid, ItemStack[] contents) {
         File folder = new File("plugins/Coreon/playerdata");

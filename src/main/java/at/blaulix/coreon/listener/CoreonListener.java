@@ -15,16 +15,31 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Locale;
 
+/**
+ * Listener für die Coreon-Inventar- und Chat-Interaktionen. Leitet Klicks im
+ * Settings-GUI an den {@link CoreonHandler} weiter und verarbeitet Chat-Eingaben
+ * für die Suche.
+ */
 public class CoreonListener implements Listener {
 
     private final CoreonHandler handler;
 
+    /**
+     * Konstruktor.
+     *
+     * @param handler CoreonHandler
+     */
     public CoreonListener(CoreonHandler handler) {
         this.handler = handler;
     }
 
     // ─── Inventory Click ──────────────────────────────────────────────────────
 
+    /**
+     * Behandelt Klicks im Coreon-Inventar (Einstellungen, Suche, Confirm-Screen).
+     *
+     * @param event InventoryClickEvent
+     */
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)) return;
@@ -124,6 +139,11 @@ public class CoreonListener implements Listener {
 
     // ─── Chat Input ───────────────────────────────────────────────────────────
 
+    /**
+     * Verarbeitet Chat-Nachrichten, wenn ein Spieler gerade einen Suchbegriff eingeben soll.
+     *
+     * @param event AsyncPlayerChatEvent
+     */
     @EventHandler(priority = EventPriority.LOWEST)
     public void onChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();

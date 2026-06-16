@@ -9,14 +9,29 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * Verwaltet das Vanish-System: Spieler verstecken/anzeigen und der Satz der
+ * aktuell versteckten Spieler.
+ */
 public class VanishHandler {
     private final Plugin plugin;
     private final Set<UUID> vanishedPlayers = new HashSet<>();
 
+    /**
+     * Erzeugt einen VanishHandler.
+     *
+     * @param plugin Plugin-Instanz (zum Verstecken/Anzeigen von Spielern)
+     */
     public VanishHandler(Plugin plugin) {
         this.plugin = plugin;
     }
 
+    /**
+     * Schaltet den Vanish-Status eines Spielers um. Wenn der Spieler noch nicht
+     * verborgen ist, wird er versteckt; andernfalls wird er wieder sichtbar gemacht.
+     *
+     * @param player Spieler dessen Vanish-Status umgeschaltet wird
+     */
     public void vanishPlayer(Player player) {
         UUID uuid = player.getUniqueId();
 
@@ -55,6 +70,11 @@ public class VanishHandler {
         }
     }
 
+    /**
+     * Liefert die Menge der aktuell versteckten Spieler-UUIDs.
+     *
+     * @return Set mit UUIDs der vanished-Spieler
+     */
     public Set<UUID> getVanishedPlayers() {
         return vanishedPlayers;
     }

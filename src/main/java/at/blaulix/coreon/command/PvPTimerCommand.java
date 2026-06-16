@@ -5,10 +5,18 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
+/**
+ * Command handler für /pvptimer - startet den PvP-Disable-Timer.
+ */
 public class PvPTimerCommand implements CommandExecutor {
 
     private final PvPTimerHandler handler;
 
+    /**
+     * Erstellt den Command-Handler mit dem zugehörigen PvPTimerHandler.
+     *
+     * @param handler PvPTimerHandler
+     */
     public PvPTimerCommand(PvPTimerHandler handler) {
         this.handler = handler;
     }

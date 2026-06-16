@@ -12,6 +12,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.*;
 
+/**
+ * Handler für das Haupt-Settings-GUI von Coreon. Verantwortlich für Erzeugen und
+ * Aktualisieren der Inventar-GUIs, Suchzustände pro Spieler und Modul-Toggles.
+ */
 public class CoreonHandler {
 
     private final Coreon plugin;
@@ -21,20 +25,42 @@ public class CoreonHandler {
     // Players currently waiting for chat input
     private final Set<UUID>              searchingPlayers = new HashSet<>();
 
+    /**
+     * Erzeugt einen neuen CoreonHandler.
+     *
+     * @param plugin Plugin-Instanz
+     */
     public CoreonHandler(Coreon plugin) {
         this.plugin = plugin;
     }
 
+    /**
+     * Liefert die Plugin-Instanz.
+     *
+     * @return Coreon-Plugininstance
+     */
     public Coreon getPlugin() { return plugin; }
 
     // ─── Per-player SearchState ───────────────────────────────────────────────
 
+    /**
+     * Liefert den Suchzustand (SearchState) für einen Spieler.
+     * Falls noch keiner existiert, wird ein neuer erstellt und zurückgegeben.
+     *
+     * @param player Spieler
+     * @return SearchState für den Spieler
+     */
     public SearchState getSearchState(Player player) {
         return searchStates.computeIfAbsent(player.getUniqueId(), k -> new SearchState());
     }
 
     // ─── Main Settings GUI ────────────────────────────────────────────────────
 
+    /**
+     * Öffnet das Haupt-Settings-Inventar für einen Spieler.
+     *
+     * @param player Zielspieler
+     */
     public void coreonSettings(Player player) {
         if (plugin.getConfig().getConfigurationSection("modules") == null) {
             player.sendMessage("§cNo modules section found in config!"); return;
@@ -46,6 +72,13 @@ public class CoreonHandler {
 
     // ─── Populate main settings inventory ────────────────────────────────────
 
+    /**
+     * Füllt das übergebene Inventar mit Items entsprechend der aktuellen Module-Config
+     * und dem aktuellen Suchzustand des Spielers.
+     *
+     * @param inv    Inventar, das befüllt werden soll
+     * @param player Spieler für dessen Suchzustand
+     */
     public void loadSettings(Inventory inv, Player player) {
         inv.clear();
         ConfigurationSection modules = plugin.getConfig().getConfigurationSection("modules");
@@ -94,6 +127,11 @@ public class CoreonHandler {
     //  Row 1 (slots 9-12): A→Z | Z→A | Enabled first | Disabled first
     //  Row 2 (slot 22):    🔍 Suchen   |  slot 18: Back
 
+    /**
+     * Öffnet das Such-Einstellungsmenü für den Spieler.
+     *
+     * @param player Spieler
+     */
     public void openSearchMenu(Player player) {
         SearchState state = getSearchState(player);
         Inventory inv = Bukkit.createInventory(null, 27, "§8Coreon §7Search Settings");
@@ -101,6 +139,12 @@ public class CoreonHandler {
         player.openInventory(inv);
     }
 
+    /**
+     * Aktualisiert die Inhalte des Suchmenüs basierend auf dem übergebenen SearchState.
+     *
+     * @param inv   Inventory-Objekt der Suche
+     * @param state SearchState des Spielers
+     */
     public void refreshSearchMenu(Inventory inv, SearchState state) {
         inv.clear();
 
@@ -184,16 +228,33 @@ public class CoreonHandler {
 
     // ─── Chat input flow ──────────────────────────────────────────────────────
 
+    /**
+     * Versetzt den Spieler in den Modus zur Texteingabe (Chat) für die Suche.
+     *
+     * @param player Spieler
+     */
     public void enterSearchInput(Player player) {
         searchingPlayers.add(player.getUniqueId());
         player.closeInventory();
         player.sendMessage("§8[§bCoreon§8] §7Suchbegriff eingeben §8(§ccancel§8 §7= Abbrechen, §aEnter §7= alle§8)§7:");
     }
 
+    /**
+     * Prüft, ob der Spieler aktuell im Such-Chatmodus ist.
+     *
+     * @param player Spieler
+     * @return {@code true}, wenn der Spieler Suchtext eingeben soll
+     */
     public boolean isSearching(Player player) {
         return searchingPlayers.contains(player.getUniqueId());
     }
 
+    /**
+     * Verarbeitet die Chat-Eingabe eines Spielers als Suchbegriff oder Abbruch.
+     *
+     * @param player Spieler
+     * @param input  eingegebener Text
+     */
     public void handleSearchInput(Player player, String input) {
         searchingPlayers.remove(player.getUniqueId());
         if (input.equalsIgnoreCase("cancel")) {
@@ -243,6 +304,12 @@ public class CoreonHandler {
 
     // ─── Module Toggle ────────────────────────────────────────────────────────
 
+    /**
+     * Schaltet ein Modul in der Konfiguration um und aktualisiert das GUI des Spielers.
+     *
+     * @param moduleName Modul-Key
+     * @param player     Spieler dessen GUI aktualisiert werden soll
+     */
     public void partSettings(String moduleName, Player player) {
         ConfigurationSection modules = plugin.getConfig().getConfigurationSection("modules");
         if (modules == null || !modules.contains(moduleName)) return;
@@ -255,12 +322,24 @@ public class CoreonHandler {
         });
     }
 
+    /**
+     * Alias für das Umschalten der Modul-Aktivität.
+     *
+     * @param moduleName Modul-Key
+     * @param player     Spieler
+     */
     public void changeActive(String moduleName, Player player) {
         partSettings(moduleName, player);
     }
 
     // ─── Confirm/Cancel screen ────────────────────────────────────────────────
 
+    /**
+     * Öffnet einen Confirm/Cancel-Screen zum (De-)Aktivieren des Moduls.
+     *
+     * @param moduleName Modul-Key
+     * @param player     Spieler
+     */
     public void deActiveSettings(String moduleName, Player player) {
         Inventory inv = Bukkit.createInventory(null, 27, "§8(de-)activation §7" + moduleName);
         ItemStack confirm = new ItemStack(Material.GREEN_WOOL);

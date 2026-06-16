@@ -13,10 +13,20 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+/**
+ * Listener für EcSee-GUIs: synchronisiert und persistiert Änderungen am EnderChest
+ * sowohl für online als auch für offline Spieler. Aktualisiert offene GUIs, wenn
+ * der Zielspieler sein EnderChest schließt.
+ */
 public class EcseeListener implements Listener {
 
     private final Coreon plugin;
 
+    /**
+     * Konstruktor.
+     *
+     * @param plugin Plugin-Instanz
+     */
     public EcseeListener(Coreon plugin) {
         this.plugin = plugin;
     }
@@ -25,6 +35,12 @@ public class EcseeListener implements Listener {
     // When the target player closes their own ender chest, refresh all open
     // EcSee GUIs that are watching them so admins see the current state.
     // -------------------------------------------------------------------------
+    /**
+     * Aktualisiert alle offenen EcSee-GUIs, die den Zielspieler beobachten, wenn
+     * dieser sein EnderChest schließt.
+     *
+     * @param event InventoryCloseEvent
+     */
     @EventHandler
     public void onEnderChestClose(InventoryCloseEvent event) {
         if (!(event.getPlayer() instanceof Player target)) return;
@@ -59,6 +75,11 @@ public class EcseeListener implements Listener {
     // -------------------------------------------------------------------------
     // Click
     // -------------------------------------------------------------------------
+    /**
+     * Behandelt Klicks in EcSee-GUIs und synchronisiert Änderungen entsprechend.
+     *
+     * @param event InventoryClickEvent
+     */
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         String title = event.getView().getTitle();
@@ -102,6 +123,11 @@ public class EcseeListener implements Listener {
     // -------------------------------------------------------------------------
     // Drag
     // -------------------------------------------------------------------------
+    /**
+     * Behandelt Drag-Events in EcSee-GUIs und synchronisiert Änderungen entsprechend.
+     *
+     * @param event InventoryDragEvent
+     */
     @EventHandler
     public void onInventoryDrag(InventoryDragEvent event) {
         String title = event.getView().getTitle();
@@ -116,6 +142,13 @@ public class EcseeListener implements Listener {
     // -------------------------------------------------------------------------
     // Central change handler
     // -------------------------------------------------------------------------
+    /**
+     * Zentrale Handler-Methode, die entscheidet ob Änderungen an ein online Ziel
+     * weitergereicht oder in YAML gespeichert werden.
+     *
+     * @param gui   Inventory mit Änderungen
+     * @param title Titel des GUIs (kann UUID enthalten)
+     */
     private void handleChange(Inventory gui, String title) {
         if (title.contains(EcseeHandler.UUID_SEPARATOR)) {
             String uuid = title.substring(title.indexOf(EcseeHandler.UUID_SEPARATOR)
@@ -135,6 +168,13 @@ public class EcseeListener implements Listener {
         }
     }
 
+    /**
+     * Synchronisiert die GUI-Inhalte mit dem EnderChest eines online Spielers
+     * und persistiert die Änderungen zur Sicherheit.
+     *
+     * @param gui    Inventory
+     * @param target Zielspieler (online)
+     */
     private void syncToOnlinePlayer(Inventory gui, Player target) {
         ItemStack[] contents = new ItemStack[27];
         for (int i = 0; i < 27; i++) contents[i] = gui.getItem(i);
@@ -143,6 +183,12 @@ public class EcseeListener implements Listener {
         Playerdata.saveOfflineEnderChest(target.getUniqueId().toString(), contents);
     }
 
+    /**
+     * Speichert die EnderChest-Inhalte eines offline Spielers in die YAML-Datei.
+     *
+     * @param gui  Inventory
+     * @param uuid UUID des Zielspielers als String
+     */
     private void saveToYaml(Inventory gui, String uuid) {
         ItemStack[] contents = new ItemStack[27];
         for (int i = 0; i < 27; i++) contents[i] = gui.getItem(i);

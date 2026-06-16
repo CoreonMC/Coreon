@@ -13,12 +13,20 @@ public class PvPTimerHandler {
     private int remainingSeconds = 0;
     private BukkitTask task;
 
+    /**
+     * Erzeugt einen neuen PvPTimerHandler.
+     *
+     * @param plugin Plugin-Instanz
+     */
     public PvPTimerHandler(Coreon plugin) {
         this.plugin = plugin;
     }
 
     /**
-     * Start a timer that disables PvP for given minutes.
+     * Startet einen Timer, der PvP für die angegebene Anzahl Minuten deaktiviert
+     * und periodisch Broadcast-Nachrichten sendet.
+     *
+     * @param minutes Dauer in Minuten
      */
     public void startTimer(int minutes) {
         // Cancel existing timer
@@ -42,7 +50,11 @@ public class PvPTimerHandler {
         }, 0L, 20L); // run every second
     }
 
-    // true if PvP is currently disabled
+    /**
+     * Prüft, ob PvP aktuell deaktiviert ist.
+     *
+     * @return {@code true}, wenn der Timer aktiv ist und PvP deaktiviert ist
+     */
     public boolean isPvPDisabled() {
         return remainingSeconds > 0;
     }

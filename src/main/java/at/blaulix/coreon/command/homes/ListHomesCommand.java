@@ -10,10 +10,20 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Command zum Auflisten der Homes (/home list). Unterstützt optional das Auflisten
+ * von Homes anderer Spieler, falls die Permission gesetzt ist.
+ */
 public class ListHomesCommand implements CommandExecutor {
     private final JavaPlugin javaPlugin;
     private final HomeDatabase homeDatabase;
 
+    /**
+     * Konstruktor.
+     *
+     * @param plugin       Plugin-Instanz
+     * @param homeDatabase HomeDatabase-Wrapper
+     */
     public ListHomesCommand(JavaPlugin plugin, HomeDatabase homeDatabase) {
         this.javaPlugin = plugin;
         this.homeDatabase = homeDatabase;

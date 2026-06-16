@@ -7,10 +7,18 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * /coreon command - öffnet das Haupt-Settings-GUI. Nur für Administratoren.
+ */
 public class CoreonCommand implements CommandExecutor {
 
     private final CoreonHandler handler;
 
+    /**
+     * Erstellt das Command mit dem entsprechenden Handler.
+     *
+     * @param handler CoreonHandler
+     */
     public CoreonCommand(CoreonHandler handler) {
         this.handler = handler;
     }

@@ -13,6 +13,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.*;
 import java.util.Objects;
 
+/**
+ * Hauptklasse des Plugins. Einstiegspunkt für das Bukkit/Spigot-Plugin.
+ *
+ * <p>Initialisiert Handler, Datenbanken, Module, Listener und Commands beim Aktivieren
+ * und führt Cleanup beim Deaktivieren durch.</p>
+ */
 public final class Coreon extends JavaPlugin {
 
     private static Coreon instance;
@@ -22,14 +28,28 @@ public final class Coreon extends JavaPlugin {
     private FileConfiguration homesConfig;
     private FileConfiguration messages;
 
+    /**
+     * Liefert die Singleton-Instanz des Plugins.
+     *
+     * @return aktuelle Plugin-Instanz oder {@code null}, wenn nicht geladen
+     */
     public static Coreon getInstance() {
         return instance;
     }
 
+    /**
+     * Liefert die geladene messages.yml-Konfiguration.
+     *
+     * @return FileConfiguration mit den Nachrichentexten
+     */
     public FileConfiguration getMessages() {
         return messages;
     }
 
+    /**
+     * Wird beim Aktivieren (Enable) des Plugins aufgerufen.
+     * Initialisiert Handler, Datenbank, Module, Listener und Commands.
+     */
     @Override
     public void onEnable() {
         instance = this;
@@ -66,13 +86,20 @@ public final class Coreon extends JavaPlugin {
         Objects.requireNonNull(getCommand("coreon")).setExecutor(new CoreonCommand(coreonHandler));
     }
 
+    /**
+     * Wird beim Deaktivieren (Disable) des Plugins aufgerufen und führt Cleanup aus.
+     */
     @Override
     public void onDisable() {
         instance = null;
         HomeDatabase.getAll().forEach(HomeDatabase::disconnect);
     }
 
-    /** Wird von CoreonHandler nach einem Modul-Toggle aufgerufen, um Commands live zu updaten. */
+    /**
+     * Aktualisiert die Commands eines einzelnen Moduls zur Laufzeit nach einem Toggle.
+     *
+     * @param key Schlüssel des Moduls, das neu angewendet werden soll
+     */
     public void applyModule(String key) {
         if (moduleManager != null) {
             moduleManager.apply(key);
@@ -137,6 +164,11 @@ public final class Coreon extends JavaPlugin {
         return section != null ? section : homesConfig;
     }
 
+    /**
+     * Liefert die Datei mit Beschreibungen für Commands im Datenverzeichnis des Plugins.
+     *
+     * @return File-Objekt zur command_descriptions.yml
+     */
     public File getCommandDescriptions() {
         return commandDescriptions;
     }

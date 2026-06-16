@@ -12,14 +12,29 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+/**
+ * Listener für InvSee-GUIs: verarbeitet Klicks/Drags und synchronisiert Änderungen
+ * entweder live mit online Spielern oder speichert sie in den YAML-Dateien für
+ * offline Spieler.
+ */
 public class InvseeListener implements Listener {
 
     private final Coreon plugin;
 
+    /**
+     * Konstruktor.
+     *
+     * @param plugin Plugin-Instanz
+     */
     public InvseeListener(Coreon plugin) {
         this.plugin = plugin;
     }
 
+    /**
+     * Behandelt Klicks in InvSee-Inventaren und synchronisiert Änderungen.
+     *
+     * @param event InventoryClickEvent
+     */
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         String title = event.getView().getTitle();
@@ -66,6 +81,11 @@ public class InvseeListener implements Listener {
         }
     }
 
+    /**
+     * Behandelt Drag-Events in InvSee-Inventaren und synchronisiert Änderungen.
+     *
+     * @param event InventoryDragEvent
+     */
     @EventHandler
     public void onInventoryDrag(InventoryDragEvent event) {
         String title = event.getView().getTitle();
@@ -84,6 +104,13 @@ public class InvseeListener implements Listener {
         );
     }
 
+    /**
+     * Zentrale Methode, die entscheidet, ob Änderungen an ein online Spieler-Inventar
+     * weitergereicht oder in YAML gespeichert werden sollen.
+     *
+     * @param gui   Inventory-Objekt mit den Änderungen
+     * @param title Titel des GUI (enthält ggf. UUID-Suffix für offline Spieler)
+     */
     private void handleChange(Inventory gui, String title) {
         if (title.contains(InvseeHandler.UUID_SEPARATOR)) {
             String uuid = title.substring(title.indexOf(InvseeHandler.UUID_SEPARATOR)
